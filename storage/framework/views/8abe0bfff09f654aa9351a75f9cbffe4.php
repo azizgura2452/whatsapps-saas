@@ -46,22 +46,22 @@
                         <?php echo csrf_field(); ?>
                         <div class="space-y-6">
                             <div>
-                                <label for="whatsapp_template_name" class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                <label for="broadcast_title" class="block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     <?php echo e(__('Title')); ?>
 
                                 </label>
-                                <input type="text" name="whatsapp_template_name" id="whatsapp_template_name" required 
-                                       value="<?php echo e(old('whatsapp_template_name')); ?>" 
+                                <input type="text" name="broadcast_title" id="broadcast_title" required 
+                                       value="<?php echo e(old('broadcast_title')); ?>" 
                                        placeholder="<?php echo e(__('Enter broadcast title')); ?>" 
                                        class="form-input form-control">
                             </div>
 
                             <div>
-                                <label for="whatsapp_template_id" class="block text-sm font-medium">
+                                <label for="whatsapp_template_name" class="block text-sm font-medium">
                                     <?php echo e(__('Template')); ?>
 
                                 </label>
-                                <select name="whatsapp_template_id" id="whatsapp_template_id" class="form-control" required>
+                                <select name="whatsapp_template_name" id="whatsapp_template_name" class="form-control" required>
                                     <?php $__currentLoopData = $templates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $template): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <option value="<?php echo e($template['name']); ?>"
                                                 data-message="<?php echo e(htmlentities(json_encode($template['components']))); ?>">
@@ -131,6 +131,39 @@
                                 </div>
                             </div>
 
+                            
+<div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+    <h3 class="font-medium mb-3"><?php echo e(__('Send Options')); ?></h3>
+    
+    <div class="space-y-3">
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="send_type" value="immediate" 
+                   class="form-radio" checked onchange="toggleScheduleInput()">
+            <span><?php echo e(__('Send Immediately')); ?></span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="send_type" value="scheduled" 
+                   class="form-radio" onchange="toggleScheduleInput()">
+            <span><?php echo e(__('Schedule for Later')); ?></span>
+        </label>
+    </div>
+
+    
+    <div id="schedule_input" class="mt-4 hidden">
+        <label class="block text-sm font-medium mb-2">
+            <?php echo e(__('Schedule Date & Time')); ?>
+
+        </label>
+        <input type="datetime-local" name="scheduled_at" class="form-control"
+               min="<?php echo e(now()->format('Y-m-d\TH:i')); ?>">
+        <small class="text-gray-500 dark:text-gray-400">
+            <?php echo e(__('Select when this broadcast should be sent')); ?>
+
+        </small>
+    </div>
+</div>
+
                             <div class="flex gap-4">
                                 <button type="submit" class="btn-primary"><?php echo e(__('Send Broadcast')); ?></button>
                                 <a href="<?php echo e(route('admin.broadcasts.index')); ?>" class="btn-default"><?php echo e(__('Cancel')); ?></a>
@@ -153,7 +186,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const templateSelect = document.getElementById('whatsapp_template_id');
+        const templateSelect = document.getElementById('whatsapp_template_name');
         const previewDiv = document.getElementById('template_preview');
         const dynamicInputsContainer = document.getElementById('dynamicInputsContainer');
         const resolvedInput = document.getElementById('resolved_template_values');
@@ -278,6 +311,23 @@
         templateSelect.addEventListener('change', updateTemplateUI);
         updateTemplateUI();
     });
+</script>
+<script>
+function toggleScheduleInput() {
+    const sendType = document.querySelector('input[name="send_type"]:checked').value;
+    const scheduleInput = document.getElementById('schedule_input');
+    const scheduleField = document.querySelector('input[name="scheduled_at"]');
+    
+    if (sendType === 'scheduled') {
+        scheduleInput.classList.remove('hidden');
+        scheduleField.required = true;
+    } else {
+        scheduleInput.classList.add('hidden');
+        scheduleField.required = false;
+    }
+}
+
+// Existing JavaScript continues...
 </script>
 
 <?php $__env->stopPush(); ?>

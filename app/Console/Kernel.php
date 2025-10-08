@@ -26,6 +26,10 @@ class Kernel extends ConsoleKernel
     {
         // Schedule the demo database refresh command every 15 minutes in demo mode.
         $schedule->command('demo:refresh-database')->everyFifteenMinutes();
+        // Check for scheduled broadcasts every minute
+        $schedule->command('broadcasts:process-scheduled')
+            ->everyMinute()
+            ->withoutOverlapping();
     }
 
     /**

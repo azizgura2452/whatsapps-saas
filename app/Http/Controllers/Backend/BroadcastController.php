@@ -2,6 +2,7 @@
 namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendScheduledBroadcastJob;
 use App\Models\Broadcast;
 use App\Models\BroadcastGroup;
 use App\Services\WhatsApp\WhatsAppService;
@@ -36,63 +37,71 @@ class BroadcastController extends Controller
             'custom_recipients' => 'nullable|string',
             'broadcast_group_id' => 'nullable|exists:broadcast_groups,id',
             'recipient_source' => 'required|in:all,custom,group',
+            'send_type' => 'required|in:immediate,scheduled',
+            'scheduled_at' => 'required_if:send_type,scheduled|nullable|date|after:now',
         ]);
 
-        $broadcast = Broadcast::create($request->only([
-            'whatsapp_template_name',
-            'custom_template',
-            'custom_recipients',
-            'broadcast_group_id'
-        ]));
+        // Determine status
+        $status = $request->send_type === 'scheduled' ? 'scheduled' : 'draft';
+        $scheduledAt = $request->send_type === 'scheduled' 
+        ? \Carbon\Carbon::parse($request->scheduled_at, 'Asia/Kolkata')->setTimezone('UTC')
+        : null;
 
-        $parts = explode('~', $request->custom_template);
+        $broadcast = Broadcast::create([
+            'whatsapp_template_name' => $request->whatsapp_template_name,
+            'broadcast_title' => $request->broadcast_title,
+            'custom_template' => $request->custom_template,
+            'custom_recipients' => $request->custom_recipients,
+            'broadcast_group_id' => $request->broadcast_group_id,
+            'status' => $status,
+            'scheduled_at' => $scheduledAt,
+        ]);
 
-        if (count($parts) < 3 || in_array('', $parts, true)) {
-            Log::error("Missing marketing template parameters for broadcast ID {$broadcast->id}");
-            return redirect()->back()->withErrors(['custom_template' => 'All template parameters must be filled.']);
+        // If immediate send, dispatch job now
+        if ($request->send_type === 'immediate') {
+            SendScheduledBroadcastJob::dispatch($broadcast);
+            
+            return redirect()->route('admin.broadcasts.index')
+                ->with('success', 'Broadcast is being sent to recipients.');
         }
 
-        $params = [
-            'offer_title' => $parts[0] ?? '',
-            'offer_description' => $parts[1] ?? '',
-            'coupon' => $parts[2] ?? ''
+        // If scheduled
+        return redirect()->route('admin.broadcasts.index')
+            ->with('success', 'Broadcast scheduled for ' . \Carbon\Carbon::parse($scheduledAt, 'UTC')->setTimezone('Asia/Kolkata'));
+    }
+
+    public function report(int $id)
+    {
+        $broadcast = Broadcast::with(['messages.conversation.customer', 'broadcastGroup'])
+            ->findOrFail($id);
+
+        $messages = $broadcast->messages()
+            ->with('conversation.customer')
+            ->get();
+
+        $stats = [
+            'total' => $messages->count(),
+            'sent' => $messages->where('status', 'sent')->count(),
+            'delivered' => $messages->where('status', 'delivered')->count(),
+            'read' => $messages->where('status', 'read')->count(),
+            'failed' => $messages->where('status', 'failed')->count(),
+            'success_rate' => $broadcast->getSuccessRate(),
         ];
 
-        // Determine recipients based on source
-        $recipients = $this->getRecipients($request);
+        return view('backend.pages.broadcasts.report', compact('broadcast', 'messages', 'stats'));
+    }
 
-        foreach ($recipients as $number) {
-            try {
-                $this->whatsAppService->sendMarketingTemplate(
-                    $number,
-                    $params,
-                    $request->whatsapp_template_id,
-                    'en',
-                    $broadcast->id
-                );
-                sleep(3);
-            } catch (\Throwable $e) {
-                Log::error("Failed to send marketing template to {$number}: {$e->getMessage()}");
-            }
+    public function destroy(int $id)
+    {
+        $broadcast = Broadcast::findOrFail($id);
+
+        // Only allow deletion if not sent or sending
+        if (in_array($broadcast->status, ['sending', 'sent'])) {
+            return back()->with('error', 'Cannot delete a broadcast that has been sent or is currently sending.');
         }
 
-        return redirect()->route('admin.broadcasts.index')
-            ->with('success', 'Broadcast created and messages sent to ' . count($recipients) . ' recipients.');
-    }
+        $broadcast->delete();
 
-    private function getRecipients(Request $request): array
-    {
-        return match($request->recipient_source) {
-            'custom' => array_map('trim', explode(',', $request->custom_recipients)),
-            'group' => $this->getGroupRecipients($request->broadcast_group_id),
-            'all' => $this->whatsAppService->getAllCustomerNumbers(),
-            default => []
-        };
-    }
-
-    private function getGroupRecipients(int $groupId): array
-    {
-        $group = BroadcastGroup::findOrFail($groupId);
-        return $group->getCustomerPhoneNumbers();
+        return back()->with('success', 'Broadcast deleted successfully.');
     }
 }

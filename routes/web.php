@@ -98,7 +98,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     Route::resource('whatsapp-templates', WhatsAppTemplatesController::class);
     // Broadcasts
     Route::resource('broadcasts', BroadcastController::class);
-    
+    Route::get('broadcasts/{id}/report', [BroadcastController::class, 'report'])
+        ->name('broadcasts.report');
     // Broadcast Groups
     Route::resource('broadcast-groups', BroadcastGroupController::class);
     Route::get('broadcast-groups-template/download', [BroadcastGroupController::class, 'downloadTemplate'])

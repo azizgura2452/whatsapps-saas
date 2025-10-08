@@ -42,20 +42,20 @@
                         @csrf
                         <div class="space-y-6">
                             <div>
-                                <label for="whatsapp_template_name" class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                <label for="broadcast_title" class="block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('Title') }}
                                 </label>
-                                <input type="text" name="whatsapp_template_name" id="whatsapp_template_name" required 
-                                       value="{{ old('whatsapp_template_name') }}" 
+                                <input type="text" name="broadcast_title" id="broadcast_title" required 
+                                       value="{{ old('broadcast_title') }}" 
                                        placeholder="{{ __('Enter broadcast title') }}" 
                                        class="form-input form-control">
                             </div>
 
                             <div>
-                                <label for="whatsapp_template_id" class="block text-sm font-medium">
+                                <label for="whatsapp_template_name" class="block text-sm font-medium">
                                     {{ __('Template') }}
                                 </label>
-                                <select name="whatsapp_template_id" id="whatsapp_template_id" class="form-control" required>
+                                <select name="whatsapp_template_name" id="whatsapp_template_name" class="form-control" required>
                                     @foreach ($templates as $template)
                                         <option value="{{ $template['name'] }}"
                                                 data-message="{{ htmlentities(json_encode($template['components'])) }}">
@@ -123,6 +123,37 @@
                                 </div>
                             </div>
 
+                            {{-- Send Type Selection --}}
+<div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+    <h3 class="font-medium mb-3">{{ __('Send Options') }}</h3>
+    
+    <div class="space-y-3">
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="send_type" value="immediate" 
+                   class="form-radio" checked onchange="toggleScheduleInput()">
+            <span>{{ __('Send Immediately') }}</span>
+        </label>
+
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="send_type" value="scheduled" 
+                   class="form-radio" onchange="toggleScheduleInput()">
+            <span>{{ __('Schedule for Later') }}</span>
+        </label>
+    </div>
+
+    {{-- Schedule DateTime Input --}}
+    <div id="schedule_input" class="mt-4 hidden">
+        <label class="block text-sm font-medium mb-2">
+            {{ __('Schedule Date & Time') }}
+        </label>
+        <input type="datetime-local" name="scheduled_at" class="form-control"
+               min="{{ now()->format('Y-m-d\TH:i') }}">
+        <small class="text-gray-500 dark:text-gray-400">
+            {{ __('Select when this broadcast should be sent') }}
+        </small>
+    </div>
+</div>
+
                             <div class="flex gap-4">
                                 <button type="submit" class="btn-primary">{{ __('Send Broadcast') }}</button>
                                 <a href="{{ route('admin.broadcasts.index') }}" class="btn-default">{{ __('Cancel') }}</a>
@@ -145,7 +176,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        const templateSelect = document.getElementById('whatsapp_template_id');
+        const templateSelect = document.getElementById('whatsapp_template_name');
         const previewDiv = document.getElementById('template_preview');
         const dynamicInputsContainer = document.getElementById('dynamicInputsContainer');
         const resolvedInput = document.getElementById('resolved_template_values');
@@ -270,6 +301,23 @@
         templateSelect.addEventListener('change', updateTemplateUI);
         updateTemplateUI();
     });
+</script>
+<script>
+function toggleScheduleInput() {
+    const sendType = document.querySelector('input[name="send_type"]:checked').value;
+    const scheduleInput = document.getElementById('schedule_input');
+    const scheduleField = document.querySelector('input[name="scheduled_at"]');
+    
+    if (sendType === 'scheduled') {
+        scheduleInput.classList.remove('hidden');
+        scheduleField.required = true;
+    } else {
+        scheduleInput.classList.add('hidden');
+        scheduleField.required = false;
+    }
+}
+
+// Existing JavaScript continues...
 </script>
 @endverbatim
 @endpush

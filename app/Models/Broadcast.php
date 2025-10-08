@@ -13,14 +13,28 @@ class Broadcast extends Model
 {
     protected $fillable = [
         'whatsapp_template_name',
+        'broadcast_title',
         'custom_template',
         'custom_recipients',
         'broadcast_group_id',
+        'status',
+        'scheduled_at',
+        'sent_at',
+    ];
+
+    protected $casts = [
+        'scheduled_at' => 'datetime',
+        'sent_at' => 'datetime',
     ];
 
     public function broadcastGroup(): BelongsTo
     {
         return $this->belongsTo(BroadcastGroup::class);
+    }
+
+    public function messages(): HasMany
+    {
+        return $this->hasMany(WhatsAppMessage::class, 'broadcast_id');
     }
 
     public function getRecipientCount(): int
@@ -33,17 +47,17 @@ class Broadcast extends Model
             return count(explode(',', $this->custom_recipients));
         }
 
-        return 0; // All customers - would need to query Customer model
-    }
-
-    public function messages(): HasMany
-    {
-        return $this->hasMany(WhatsAppMessage::class);
+        return 0;
     }
 
     public function getSentCount(): int
     {
-        return $this->messages()->count();
+        return $this->messages()->whereIn('status', ['sent', 'delivered', 'read'])->count();
+    }
+
+    public function getFailedCount(): int
+    {
+        return $this->messages()->where('status', 'failed')->count();
     }
 
     public function getDeliveredCount(): int
@@ -55,10 +69,7 @@ class Broadcast extends Model
     {
         return $this->messages()->where('status', 'read')->count();
     }
-    public function getFailedCount(): int
-    {
-        return $this->messages()->where('status', 'failed')->count();
-    }
+
     public function getSuccessRate(): float
     {
         $total = $this->messages()->count();
@@ -66,5 +77,22 @@ class Broadcast extends Model
         
         $successful = $this->getSentCount();
         return round(($successful / $total) * 100, 2);
+    }
+
+    public function isScheduled(): bool
+    {
+        return $this->status === 'scheduled' && $this->scheduled_at !== null;
+    }
+
+    public function isDue(): bool
+    {
+        return $this->isScheduled() && $this->scheduled_at <= now();
+    }
+
+    // Scope for scheduled broadcasts that are due
+    public function scopeDue($query)
+    {
+        return $query->where('status', 'scheduled')
+            ->where('scheduled_at', '<=', now());
     }
 }
