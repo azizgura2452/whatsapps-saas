@@ -63,7 +63,7 @@
                     <tbody>
                         @forelse ($orders as $order)
                             <tr class="border-b border-gray-100 dark:border-gray-800">
-                                <td class="px-5 py-4 sm:px-6">{{ $loop->iteration }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $orders->firstItem() + $loop->index }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $order->id }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $order->customer->name }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ number_format($order->total, 3) }}</td>

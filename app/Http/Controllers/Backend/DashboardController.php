@@ -11,6 +11,8 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Charts\UserChartService;
 use App\Services\LanguageService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -29,21 +31,57 @@ class DashboardController extends Controller
         return view(
             'backend.pages.dashboard.index',
             [
-                // 'total_users' => number_format(User::count()),
-                // 'total_roles' => number_format(Role::count()),
-                // 'total_permissions' => number_format(Permission::count()),
                 'total_products' => number_format(Product::count()),
-                'total_customers' => number_format(num: Customer::count()),
-                'total_orders' => number_format(num: Order::count()),
+                'total_customers' => number_format(Customer::count()),
+                'total_orders' => number_format(Order::count()),
                 'languages' => [
-                        'total' => number_format(count($this->languageService->getLanguages())),
-                        'active' => number_format(count($this->languageService->getActiveLanguages())),
-                    ],
+                    'total' => number_format(count($this->languageService->getLanguages())),
+                    'active' => number_format(count($this->languageService->getActiveLanguages())),
+                ],
                 'user_growth_data' => $this->userChartService->getUserGrowthData(
                     request()->get('chart_filter_period', 'last_12_months')
                 )->getData(true),
                 'user_history_data' => $this->userChartService->getUserHistoryData(),
             ]
         );
+    }
+
+    public function stats(): JsonResponse
+    {
+        $this->checkAuthorization(auth()->user(), ['dashboard.view']);
+
+        $stats = [
+            'products' => Product::count(),
+            'customers' => Customer::count(),
+            'orders' => Order::count(),
+            'languages' => [
+                'total' => count($this->languageService->getLanguages()),
+                'active' => count($this->languageService->getActiveLanguages()),
+            ],
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $stats,
+        ]);
+    }
+
+    /**
+     * Send a test email.
+     */
+    public function sendTestEmail()
+    {
+        $this->checkAuthorization(auth()->user(), ['dashboard.view']);
+
+        Mail::raw('Hello, this is a test email sent from the DashboardController!', function ($message) {
+            $message->to('difora5626@fenexy.com')
+                    ->subject('New order received')
+                    ->from(config('mail.from.address'), config('mail.from.name'));
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Test email sent successfully!',
+        ]);
     }
 }

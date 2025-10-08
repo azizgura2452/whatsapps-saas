@@ -14,6 +14,7 @@ class WhatsAppService
     protected $conversationState;
     protected $customerService;
     protected $wabaId;
+    protected $graph_version;
 
     public function __construct(ConversationStateService $conversationState = null, CustomerService $customerService)
     {
@@ -23,6 +24,7 @@ class WhatsAppService
         $this->conversationState = $conversationState;
         $this->customerService = $customerService;
         $this->wabaId = config('services.whatsapp.business_account_id');
+        $this->graph_version = config('services.graph_version');
     }
 
     public function getAllCustomerNumbers(): array
@@ -226,7 +228,7 @@ class WhatsAppService
     {
         $response = Http::withToken($this->token)
             ->withOptions(['verify' => false])
-            ->get("https://graph.facebook.com/v22.0/{$this->catalogId}/product_sets?fields=id,name");
+            ->get("https://graph.facebook.com/{$this->graph_version}/{$this->catalogId}/product_sets?fields=id,name");
 
         if (!$response->ok()) {
             Log::error('Failed to fetch catalog categories:', $response->json());
@@ -243,7 +245,7 @@ class WhatsAppService
     {
         $response = Http::withToken($this->token)
             ->withOptions(['verify' => false])
-            ->get("https://graph.facebook.com/v22.0/$categoryId/products");
+            ->get("https://graph.facebook.com/{$this->graph_version}/$categoryId/products");
 
         if (!$response->ok()) {
             Log::error('Failed to fetch products from category:', $response->json());
@@ -261,7 +263,7 @@ class WhatsAppService
         try {
             $response = Http::withToken($this->token)
                 ->withOptions(['verify' => false])
-                ->post("https://graph.facebook.com/v22.0/{$this->phoneId}/messages", $payload);
+                ->post("https://graph.facebook.com/{$this->graph_version}/{$this->phoneId}/messages", $payload);
 
             if (!$response->successful()) {
                 Log::error('WhatsApp API error:', $response->json());
@@ -331,6 +333,48 @@ class WhatsAppService
         } catch (\Exception $e) {
             Log::error('WhatsApp Template API exception: ' . $e->getMessage());
             return response()->json(['status' => 'error', 'message' => 'Exception occurred'], 500);
+        }
+    }
+
+    public function downloadMedia(string $mediaId): ?array
+    {
+        try {
+            // Step 1: Metadata
+            $metaResponse = Http::withToken($this->token)
+                ->withOptions(['verify' => false])
+                ->get("https://graph.facebook.com/v22.0/{$mediaId}");
+
+            if (!$metaResponse->successful()) {
+                Log::error("WhatsApp media metadata fetch failed", $metaResponse->json());
+                return null;
+            }
+
+            $meta = $metaResponse->json();
+            $url = $meta['url'] ?? null;
+            $mime = $meta['mime_type'] ?? 'application/octet-stream';
+
+            if (!$url) {
+                return null;
+            }
+
+            // Step 2: Download
+            $fileResponse = Http::withToken($this->token)
+                ->withOptions(['verify' => false])
+                ->get($url);
+
+            if (!$fileResponse->successful()) {
+                Log::error("WhatsApp media download failed", $fileResponse->json());
+                return null;
+            }
+
+            return [
+                'mime_type' => $mime,
+                'content'   => $fileResponse->body(),
+            ];
+
+        } catch (\Exception $e) {
+            Log::error("WhatsApp media exception: " . $e->getMessage());
+            return null;
         }
     }
 

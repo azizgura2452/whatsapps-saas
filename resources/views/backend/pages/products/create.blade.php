@@ -73,8 +73,8 @@
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('Status') }}</label>
                             <select name="status" id="status" class="form-input  form-control">
-                                <option value="active" {{ old('status') === 'active' ? 'selected' : '' }}>{{ __('In Stock') }}</option>
-                                <option value="inactive" {{ old('status') === 'inactive' ? 'selected' : '' }}>{{ __('Out of Stock') }}</option>
+                                <option value="1" {{ old('status') === 'active' ? 'selected' : '' }}>{{ __('In Stock') }}</option>
+                                <option value="0" {{ old('status') === 'inactive' ? 'selected' : '' }}>{{ __('Out of Stock') }}</option>
                             </select>
                         </div>
                         <div class="sm:col-span-2">

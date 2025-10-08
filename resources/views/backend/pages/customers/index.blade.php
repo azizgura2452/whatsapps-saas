@@ -37,9 +37,37 @@
           <div class="px-5 py-4 sm:px-6 sm:py-5 flex justify-between items-center">
                 <h3 class="text-base font-medium text-gray-800 dark:text-white/90">{{ __('Customers') }}</h3>
 
-                @include('backend.partials.search-form', [
-                    'placeholder' => __('Search by name or number'),
-                ])
+                <div class="flex items-center gap-2">
+                    {{-- Free text search --}}
+                    @include('backend.partials.search-form', [
+                        'placeholder' => __('Search by name, number, or attribute'),
+                    ])
+
+                    {{-- Attribute filter --}}
+                    <form method="GET" action="{{ route('admin.customers.index') }}" class="flex items-center gap-2" id="filter-form">
+    <select name="attribute" id="attribute"
+        class="rounded-lg border-gray-300 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        <option value="">{{ __('Select Attribute') }}</option>
+        @foreach($attributes as $attr)
+            <option value="{{ $attr }}" {{ request('attribute') == $attr ? 'selected' : '' }}>
+                {{ ucfirst($attr) }}
+            </option>
+        @endforeach
+    </select>
+
+    <select name="value" id="value"
+        class="rounded-lg border-gray-300 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        <option value="">{{ __('Select Value') }}</option>
+        {{-- Values will be populated by AJAX --}}
+    </select>
+
+    <button type="submit" class="btn-primary">
+        <i class="bi bi-search"></i> {{ __('Search') }}
+    </button>
+</form>
+
+                </div>
+
 
                 <div class="flex items-center gap-2">
                     @if (auth()->user()->can('customers.edit'))
@@ -58,6 +86,10 @@
                             <th width="5%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('#') }}</th>
                             <th width="15%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Name') }}</th>
                             <th width="10%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('WhatsApp Number') }}</th>
+                            <th width="20%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">
+    {{ __('Attributes') }}
+</th>
+
                             @php ld_apply_filters('user_list_page_table_header_before_action', '') @endphp
                             <th width="15%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Action') }}</th>
                             @php ld_apply_filters('user_list_page_table_header_after_action', '') @endphp
@@ -66,9 +98,20 @@
                     <tbody>
                         @forelse ($customers as $customer)
                             <tr class="{{ $loop->index + 1 != count($customers) ?  'border-b border-gray-100 dark:border-gray-800' : '' }}">
-                                <td class="px-5 py-4 sm:px-6">{{ $loop->index + 1 }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $customers->firstItem() + $loop->index }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ ucwords($customer->name) }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $customer->whatsapp_number }}</td>
+                                <td class="px-5 py-4 sm:px-6">
+    @foreach($customer->attributes->take(2) as $attr)
+        <span class="inline-block text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 mr-1">
+            {{ $attr->key }}: {{ $attr->value }}
+        </span>
+    @endforeach
+    @if($customer->attributes->count() > 2)
+        <span class="text-xs text-gray-500">+{{ $customer->attributes->count() - 2 }} more</span>
+    @endif
+</td>
+
                                 @php ld_apply_filters('customer_list_page_table_row_before_action', '', $customer) @endphp
                                 <td class="flex px-5 py-4 sm:px-6 text-center gap-1">
                                     @if (auth()->user()->can('customers.view'))
@@ -163,3 +206,41 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.getElementById('attribute').addEventListener('change', function() {
+    let attribute = this.value;
+    let valueDropdown = document.getElementById('value');
+
+    // Clear old options
+    valueDropdown.innerHTML = '<option value="">{{ __('Select Value') }}</option>';
+
+    if (attribute) {
+        fetch(`/admin/customers/attribute-values/${attribute}`)
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(val => {
+                    let option = document.createElement('option');
+                    option.value = val;
+                    option.textContent = val;
+                    // Preserve selected value if coming back from search
+                    if ("{{ request('value') }}" === val) {
+                        option.selected = true;
+                    }
+                    valueDropdown.appendChild(option);
+                });
+            })
+            .catch(err => console.error('Error fetching attribute values:', err));
+    }
+});
+
+// Auto-load values if page has attribute pre-selected
+window.addEventListener('DOMContentLoaded', function() {
+    let selectedAttr = document.getElementById('attribute').value;
+    if (selectedAttr) {
+        document.getElementById('attribute').dispatchEvent(new Event('change'));
+    }
+});
+</script>
+@endpush

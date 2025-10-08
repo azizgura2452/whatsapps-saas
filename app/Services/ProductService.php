@@ -15,13 +15,14 @@ class ProductService
 
         if ($search) {
             $query->where('name_en', 'like', "%{$search}%")
-                ->orWhere('description_en', 'like', "%{$search}%");
+                ->orWhere('description_en', 'like', "%{$search}%")
+                ->orWhere('sku', 'like', "%{$search}%");
         }
 
-        $category = request()->input('category');
-        if ($category) {
-            $query->where('category_id', $category);
-        }
+        // $category = request()->input('category');
+        // if ($category) {
+        //     $query->where('category_id', $category);
+        // }
 
         return $query->latest()->paginate(config('settings.default_pagination') ?? 10);
     }

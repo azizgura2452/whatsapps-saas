@@ -34,12 +34,18 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Check if settings table schema is present.
-        if (Schema::hasTable('settings')) {
-            $settings = Setting::pluck('option_value', 'option_name')->toArray();
-            foreach ($settings as $key => $value) {
-                config(['settings.' . $key => $value]);
+        try {
+            if (Schema::hasTable('settings')) {
+                $settings = Setting::pluck('option_value', 'option_name')->toArray();
+                foreach ($settings as $key => $value) {
+                    config(['settings.' . $key => $value]);
+                }
             }
+        } catch (\Exception $e) {
+            // Database is not available or misconfigured
+            // Fail silently so app can still boot
         }
+
 
         // Only allowed people can view the pulse.
         Gate::define('viewPulse', function (User $user) {

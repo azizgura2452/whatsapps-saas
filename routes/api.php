@@ -32,7 +32,9 @@ Route::get('/translations/{lang}', function (string $lang) {
     return response()->json($translations);
 });
 
-Route::match(['get', 'post'], '/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook']);
+Route::get('/whatsapp/webhook', [WhatsAppController::class, 'verifyWebhook']);
+
+Route::match(['post'], '/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook']);
 // Route::prefix('webhooks')->group(function () {
 //     Route::match(['get', 'post'], 'whatsapp', [WhatsAppController::class, 'handleWebhook']);
 //     Route::get('whatsapp/test', [WhatsAppController::class, 'test']);

@@ -23,11 +23,16 @@ class ProductController extends Controller
     public function index()
     {
         $this->checkAuthorization(auth()->user(), ['products.view']);
-
+    
+        $products = $this->productService->getProducts();
+        $totalStock = $products->sum('stock');
+    
         return view('backend.pages.products.index', [
-            'products' => $this->productService->getProducts()
+            'products' => $products,
+            'totalStock' => $totalStock,
         ]);
     }
+
 
     public function create()
     {
@@ -41,9 +46,29 @@ class ProductController extends Controller
             'sku' => 'required|unique:products,sku',
             'price' => 'required|numeric',
             'stock' => 'required|integer',
+            'status' => 'required|string',
+            'image' => 'nullable|image|max:2048',
+        ]);
+        
+        // Prepare data
+        $data = $request->only([
+            'name_en',
+            'name_ar',
+            'description_en',
+            'description_ar',
+            'sku',
+            'brand',
+            'price',
+            'stock',
         ]);
 
-        Product::create($request->all());
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('uploads/products', 'public');
+            $data['image'] = $path;
+        }
+        
+        Product::create($data);
 
         return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
     }
@@ -90,15 +115,16 @@ class ProductController extends Controller
 
         $this->storeActionLog(ActionType::UPDATED, ['product' => $product]);
 
-        session()->flash('success', 'Product has been updated.');
-
-        return back();
+        $page = $request->input('page', 1);
+    
+        return redirect()->route('admin.products.index', ['page' => $page])
+                         ->with('success', 'Product updated successfully.');
     }
 
 
     public function destroy(Product $product)
     {
         $product->delete();
-        return redirect()->route('backend.pages.products.index')->with('success', 'Product deleted successfully.');
+        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
     }
 }

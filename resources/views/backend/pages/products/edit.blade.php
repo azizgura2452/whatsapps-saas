@@ -132,6 +132,8 @@
                             <button type="submit" class="btn-primary">{{ __('Save') }}</button>
                             <a href="{{ route('admin.products.index') }}" class="btn-default">{{ __('Cancel') }}</a>
                         </div>
+                        <input type="hidden" name="page" value="{{ request()->get('page') }}">
+
                     </form>
                 </div>
             </div>

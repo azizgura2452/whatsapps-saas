@@ -8,6 +8,7 @@ use App\Enums\ActionType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Models\Customer;
+use App\Models\CustomerAttribute;
 use App\Models\WhatsAppConversation;
 use App\Models\WhatsAppMessage;
 use App\Services\CustomerService;
@@ -16,12 +17,14 @@ use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Services\WhatsApp\WhatsAppService;
 
 class CustomersController extends Controller
 {
     public function __construct(
         private readonly CustomerService $customerService,
-        private readonly RolesService $rolesService
+        private readonly RolesService $rolesService,
+        private readonly WhatsAppService $whatsAppService
     ) {
     }
 
@@ -29,9 +32,46 @@ class CustomersController extends Controller
     {
         $this->checkAuthorization(auth()->user(), ['user.view']);
 
+        // get all distinct attribute keys
+        $attributes = CustomerAttribute::select('key')
+            ->distinct()
+            ->pluck('key');
+
+        // get all distinct values
+        $values = CustomerAttribute::select('value')
+            ->distinct()
+            ->pluck('value');
+
         return view('backend.pages.customers.index', [
             'customers' => $this->customerService->getCustomers(),
+            'attributes' => $attributes,
+            'values' => $values,
         ]);
+    }
+
+    public function getAttributeValues(string $key)
+    {
+        $values = \App\Models\CustomerAttribute::where('key', $key)
+            ->select('value')
+            ->distinct()
+            ->pluck('value');
+
+        return response()->json($values);
+    }
+
+    public function sendMessage(Request $request, int $customerId)
+    {
+        $this->checkAuthorization(auth()->user(), ['customers.edit']);
+
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $customer = Customer::findOrFail($customerId);
+
+        // Send via WhatsApp Cloud API (or your wrapper service)
+        $this->whatsAppService->sendText($customer->whatsapp_number, $request->message);
+        return response()->json(['success' => true]);
     }
 
     public function create(): Renderable
@@ -43,26 +83,70 @@ class CustomersController extends Controller
         return view('backend.pages.customers.create');
     }
 
-    public function store(FormRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $this->checkAuthorization(auth()->user(), ['customers.create']);
 
         $user = new Customer();
         $user->name = $request->name;
         $user->whatsapp_number = $request->whatsapp_number;
-
-        $user = ld_apply_filters('customer_store_before_save', $user, $request);
+        $user->address = $request->address;
+        $user->birthday = $request->birthday;
+        $user->gender = $request->gender;
         $user->save();
-        $user = ld_apply_filters('customer_store_after_save', $user, $request);
 
-        $this->storeActionLog(ActionType::CREATED, ['customer' => $user]);
+        // handle dynamic attributes
+        $attributes = $request->input('attributes', []);
+        if (!empty($attributes['key'])) {
+            foreach ($attributes['key'] as $i => $key) {
+                $value = $attributes['value'][$i] ?? null;
+                if ($key && $value) {
+                    $user->attributes()->create([
+                        'key' => $key,
+                        'value' => $value,
+                    ]);
+                }
+            }
+        }
 
         session()->flash('success', __('Customer has been created.'));
-
-        ld_do_action('customer_store_after', $user);
-
         return redirect()->route('admin.customers.index');
     }
+
+
+    public function update(Request $request, int $id): RedirectResponse
+    {
+        $this->checkAuthorization(auth()->user(), ['customers.edit']);
+
+        $user = Customer::findOrFail($id);
+        $user->name = $request->name;
+        $user->whatsapp_number = $request->whatsapp_number;
+        $user->address = $request->address;
+        $user->birthday = $request->birthday;
+        $user->gender = $request->gender;
+        $user->save();
+
+        // refresh attributes
+        $user->attributes()->delete();
+
+        $attributes = $request->input('attributes', []);
+        if (!empty($attributes['key'])) {
+            foreach ($attributes['key'] as $i => $key) {
+                $value = $attributes['value'][$i] ?? null;
+                if ($key && $value) {
+                    $user->attributes()->create([
+                        'key' => $key,
+                        'value' => $value,
+                    ]);
+                }
+            }
+        }
+
+        session()->flash('success', 'Customer has been updated.');
+        return back();
+    }
+
+
 
     public function edit(int $id): Renderable
     {
@@ -77,26 +161,6 @@ class CustomersController extends Controller
         return view('backend.pages.customers.edit', [
             'customer' => $user
         ]);
-    }
-
-    public function update(FormRequest $request, int $id): RedirectResponse
-    {
-        $this->checkAuthorization(auth()->user(), ['customers.edit']);
-        $user = Customer::findOrFail($id);
-
-        $user->name = $request->name;
-        $user->whatsapp_number = $request->whatsapp_number;
-
-        $user = ld_apply_filters('customer_update_before_save', $user, $request);
-        $user->save();
-        $user = ld_apply_filters('customer_update_after_save', $user, $request);
-        ld_do_action('customer_update_after', $user);
-
-        $this->storeActionLog(ActionType::UPDATED, ['customer' => $user]);
-
-        session()->flash('success', 'Customer has been updated.');
-
-        return back();
     }
 
     public function destroy(int $id): RedirectResponse
@@ -179,6 +243,15 @@ class CustomersController extends Controller
             ->orderBy('timestamp', 'asc')
             ->get();
 
-        return response()->json(['messages' => $messages]);
+        $html = view('backend.pages.chatbox._messages', [
+            'messages' => $messages,
+        ])->render();
+
+        return response()->json([
+            'html' => $html,
+            'lastTs' => $messages->last()->timestamp ?? $since,
+            'count' => $messages->count(),
+        ]);
     }
+
 }

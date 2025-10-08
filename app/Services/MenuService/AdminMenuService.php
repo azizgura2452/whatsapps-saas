@@ -77,38 +77,6 @@ class AdminMenuService
         ]);
 
         $this->addMenuItem([
-            'label' => __('Roles & Permissions'),
-            'icon' => 'key.svg',
-            'id' => 'roles-submenu',
-            'active' => Route::is('admin.roles.*'),
-            'priority' => 10,
-            'permissions' => ['role.create', 'role.view', 'role.edit', 'role.delete'],
-            'children' => [
-                [
-                    'label' => __('Roles'),
-                    'route' => route('admin.roles.index'),
-                    'active' => Route::is('admin.roles.index') || Route::is('admin.roles.edit'),
-                    'priority' => 10,
-                    'permissions' => 'role.view'
-                ],
-                [
-                    'label' => __('New Role'),
-                    'route' => route('admin.roles.create'),
-                    'active' => Route::is('admin.roles.create'),
-                    'priority' => 20,
-                    'permissions' => 'role.create'
-                ],
-                [
-                    'label' => __('Permissions'),
-                    'route' => route('admin.permissions.index'),
-                    'active' => Route::is('admin.permissions.index') || Route::is('admin.permissions.show'),
-                    'priority' => 30,
-                    'permissions' => 'role.view'
-                ]
-            ]
-        ]);
-
-        $this->addMenuItem([
             'label' => __('Products'),
             'iconClass' => 'bi bi-bag text-lg',
             'id' => 'products-submenu',
@@ -118,6 +86,7 @@ class AdminMenuService
             'children' => [
                 [
                     'label' => __('Products'),
+                    'iconClass' => 'fa fa-list',
                     'route' => route('admin.products.index'),
                     'active' => Route::is('admin.products.index') || Route::is('admin.products.edit'),
                     'priority' => 20,
@@ -125,6 +94,7 @@ class AdminMenuService
                 ],
                 [
                     'label' => __('New Product'),
+                    'iconClass' => 'fa fa-plus',
                     'route' => route('admin.products.create'),
                     'active' => Route::is('admin.products.create'),
                     'priority' => 10,
@@ -140,19 +110,21 @@ class AdminMenuService
             'active' => Route::is('admin.orders.*'),
             'priority' => 1,
             'permissions' => ['orders.create', 'orders.view', 'orders.edit', 'orders.delete'],
-            'children' => [
-                [
-                    'label' => __('Orders'),
-                    'route' => route('admin.orders.index'),
-                    'active' => Route::is('admin.orders.index') || Route::is('admin.orders.edit'),
-                    'priority' => 20,
-                    'permissions' => 'orders.view'
-                ]
-            ]
+            'route' => route('admin.orders.index'),
         ]);
 
         $this->addMenuItem([
-            'label' => __('Customer'),
+            'label' => __('WhatsApp Chats'),
+            'iconClass' => 'fa fa-whatsapp',
+            'id' => 'chatbox-submenu',
+            'active' => Route::is('admin.whatsapp.chatbox'),
+            'priority' => 19,
+            'permissions' => ['chatbox.create', 'chatbox.view', 'chatbox.edit', 'chatbox.delete'],
+            'route' => route('admin.whatsapp.chatbox'),
+        ]);
+
+        $this->addMenuItem([
+            'label' => __('Customers'),
             'icon' => 'user.svg',
             'id' => 'customers-submenu',
             'active' => Route::is('admin.customers.*'),
@@ -160,7 +132,8 @@ class AdminMenuService
             'permissions' => ['customers.create', 'customers.view', 'customers.edit', 'customers.delete'],
             'children' => [
                 [
-                    'label' => __('Customers'),
+                    'label' => __('List Customers'),
+                    'icon' => 'user.svg',
                     'route' => route('admin.customers.index'),
                     'active' => Route::is('admin.customers.index') || Route::is('admin.customers.edit'),
                     'priority' => 20,
@@ -168,6 +141,7 @@ class AdminMenuService
                 ],
                 [
                     'label' => __('New Customer'),
+                    'iconClass' => 'fa fa-plus',
                     'route' => route('admin.customers.create'),
                     'active' => Route::is('admin.customers.create'),
                     'priority' => 10,
@@ -178,7 +152,7 @@ class AdminMenuService
 
         $this->addMenuItem([
             'label' => __('Marketing'),
-            'icon' => 'user.svg',
+            'iconClass' => 'fa fa-bullseye',
             'id' => 'marketing-submenu',
             'active' => Route::is('admin.whatsapp-templates.*'),
             'priority' => 20,
@@ -192,10 +166,19 @@ class AdminMenuService
                     'permissions' => 'templates.view'
                 ],
                 [
+                    'label' => __('Broadcast Groups'),
+                    'iconClass' => 'fa fa-users',
+                    'route' => route('admin.broadcast-groups.index'),
+                    'active' => Route::is('admin.broadcast-groups.index') || Route::is('admin.broadcast-groups.edit'),
+                    'priority' => 10,
+                    'permissions' => 'broadcasts.view'
+                ],
+                [
                     'label' => __('Broadcasts'),
+                    'iconClass' => 'fa fa-bullhorn',
                     'route' => route('admin.broadcasts.index'),
                     'active' => Route::is('admin.broadcasts.index') || Route::is('admin.broadcasts.edit'),
-                    'priority' => 10,
+                    'priority' => 12,
                     'permissions' => 'broadcasts.view'
                 ]
             ]
@@ -211,6 +194,7 @@ class AdminMenuService
             'children' => [
                 [
                     'label' => __('Users'),
+                    'iconClass' => 'fa fa-list',
                     'route' => route('admin.users.index'),
                     'active' => Route::is('admin.users.index') || Route::is('admin.users.edit'),
                     'priority' => 20,
@@ -218,6 +202,7 @@ class AdminMenuService
                 ],
                 [
                     'label' => __('New User'),
+                    'iconClass' => 'fa fa-plus',
                     'route' => route('admin.users.create'),
                     'active' => Route::is('admin.users.create'),
                     'priority' => 10,
@@ -263,15 +248,52 @@ class AdminMenuService
         // ]);
 
         $this->addMenuItem([
+            'label' => __('Roles & Permissions'),
+            'icon' => 'key.svg',
+            'id' => 'roles-submenu',
+            'active' => Route::is('admin.roles.*'),
+            'priority' => 2,
+            'permissions' => ['role.create', 'role.view', 'role.edit', 'role.delete'],
+            'children' => [
+                [
+                    'label' => __('Roles'),
+                    'iconClass' => 'fa fa-list',
+                    'route' => route('admin.roles.index'),
+                    'active' => Route::is('admin.roles.index') || Route::is('admin.roles.edit'),
+                    'priority' => 1,
+                    'permissions' => 'role.view'
+                ],
+                [
+                    'label' => __('New Role'),
+                    'iconClass' => 'fa fa-plus',
+                    'route' => route('admin.roles.create'),
+                    'active' => Route::is('admin.roles.create'),
+                    'priority' => 2,
+                    'permissions' => 'role.create'
+                ],
+                [
+                    'label' => __('Permissions'),
+                    'iconClass' => 'fa fa-lock',
+                    'route' => route('admin.permissions.index'),
+                    'active' => Route::is('admin.permissions.index') || Route::is('admin.permissions.show'),
+                    'priority' => 3,
+                    'permissions' => 'role.view'
+                ]
+            ]
+        ], __('More'));
+
+
+        $this->addMenuItem([
             'label' => __('Settings'),
             'icon' => 'settings.svg',
             'id' => 'settings-submenu',
             'active' => Route::is('admin.settings.*') || Route::is('admin.translations.*'),
-            'priority' => 1,
+            'priority' => 3,
             'permissions' => ['settings.edit', 'translations.view'],
             'children' => [
                 [
                     'label' => __('General Settings'),
+                    'iconClass' => 'fa fa-list',
                     'route' => route('admin.settings.index'),
                     'active' => Route::is('admin.settings.index'),
                     'priority' => 20,
@@ -293,7 +315,7 @@ class AdminMenuService
             'route' => route('admin.dashboard'),
             'active' => false,
             'id' => 'logout',
-            'priority' => 1,
+            'priority' => 4,
             'html' => '
                 <li class="hover:menu-item-active">
                     <form method="POST" action="' . route('logout') . '">

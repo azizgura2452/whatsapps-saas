@@ -29,13 +29,14 @@
                             <td class="p-3">
                                 @if ($broadcast->custom_recipients)
                                     <span class="cursor-pointer underline decoration-dotted text-blue-600"
-                                        title="{{ $broadcast->custom_recipients }}">
-                                        Custom
+                                        onclick="showRecipients({{ json_encode(explode(',', $broadcast->custom_recipients)) }})">
+                                        View Recepients
                                     </span>
                                 @else
                                     All Customers
                                 @endif
                             </td>
+
 
                             <td class="p-3">{{ $broadcast->created_at->format('Y-m-d H:i') }}</td>
                         </tr>
@@ -46,4 +47,49 @@
 
         <div class="mt-4">{{ $broadcasts->links() }}</div>
     </div>
+    <!-- Recipients Modal -->
+    <div id="recipientsModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+        <div class="bg-white w-[95%] max-w-md rounded-xl shadow-xl p-6 relative">
+            <button onclick="closeRecipients()"
+                class="absolute top-2 right-3 text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+
+            <h2 class="text-lg font-semibold mb-4">All Recipients</h2>
+            <div class="overflow-x-auto max-h-[400px] overflow-y-auto border rounded">
+                <table class="min-w-full border text-sm">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="p-2 text-left border-b">#</th>
+                            <th class="p-2 text-left border-b">Phone Number</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recipientsTableBody">
+                        <!-- Filled dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        function showRecipients(numbers) {
+            const tableBody = document.getElementById('recipientsTableBody');
+            tableBody.innerHTML = '';
+
+            numbers.forEach((num, index) => {
+                const row = `<tr class="border-t">
+                                    <td class="p-2">${index + 1}</td>
+                                    <td class="p-2">${num}</td>
+                                </tr>`;
+                tableBody.insertAdjacentHTML('beforeend', row);
+            });
+
+            document.getElementById('recipientsModal').classList.remove('hidden');
+        }
+
+        function closeRecipients() {
+            document.getElementById('recipientsModal').classList.add('hidden');
+        }
+    </script>
+
 @endsection

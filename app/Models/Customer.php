@@ -15,6 +15,8 @@ class Customer extends Model
         'name',
         'address',
         'whatsapp_number',
+        'birthday',
+        'gender',
     ];
 
     public function orders()
@@ -27,4 +29,8 @@ class Customer extends Model
         return $this->hasOne(WhatsAppConversation::class);
     }
 
+    public function attributes()
+    {
+        return $this->hasMany(CustomerAttribute::class);
+    }
 }

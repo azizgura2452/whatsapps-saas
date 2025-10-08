@@ -5,9 +5,38 @@
 @endsection
 
 @section('admin-content')
-    <div class="p-6 max-w-4xl mx-auto">
-        <h1 class="text-xl font-semibold mb-4">New Broadcast</h1>
+    <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+        <div x-data="{ pageName: '{{ __('New Broadcast') }}' }">
+            <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ __('New Broadcast') }}</h2>
+                <nav>
+                    <ol class="flex items-center gap-1.5">
+                        <li>
+                            <a class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
+                                href="{{ route('admin.dashboard') }}">
+                                {{ __('Home') }}
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400"
+                                href="{{ route('admin.broadcasts.index') }}">
+                                {{ __('Broadcasts') }}
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        <li class="text-sm text-gray-800 dark:text-white/90">
+                            {{ __('New Broadcast') }}
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
 
+        <div class="space-y-6">
+            <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
+
+                <div class="p-5 space-y-6 border-t border-gray-100 dark:border-gray-800 sm:p-6">
         @include('backend.layouts.partials.messages')
 
         <form action="{{ route('admin.broadcasts.store') }}" method="POST">
@@ -29,10 +58,14 @@
                     </select>
                 </div>
 
-                <div>
+                <div id="dynamicInputsContainer" class="space-y-4"></div>
+                <input type="hidden" name="custom_template" id="resolved_template_values">
+
+
+                <!-- <div>
                     <label class="block text-sm font-medium" for="custom_template">Custom Message</label>
                     <textarea name="custom_template" id="custom_template" class="form-control" rows="6" required style="min-height: 100px">{{ old('custom_template') }}</textarea>
-                </div>
+                </div> -->
 
                 <div>
                     <label class="block text-sm font-medium">Preview</label>
@@ -51,96 +84,85 @@
                 </div>
             </div>
         </form>
+                </div>
+            </div>
+        </div>
+
     </div>
 @endsection
 
+@verbatim
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var templateSelect = document.getElementById('whatsapp_template_id');
-        var templateContent = document.getElementById('custom_template');
-        var previewDiv = document.getElementById('template_preview');
+        const templateSelect = document.getElementById('whatsapp_template_id');
+        const previewDiv = document.getElementById('template_preview');
+        const dynamicInputsContainer = document.getElementById('dynamicInputsContainer');
+        const resolvedInput = document.getElementById('resolved_template_values');
 
         function decodeHTMLEntities(str) {
-            var textarea = document.createElement('textarea');
+            const textarea = document.createElement('textarea');
             textarea.innerHTML = str;
             return textarea.value;
         }
 
-        function extractInputFormat(componentsJson) {
+        function extractPlaceholders(componentsJson) {
             try {
-                var components = JSON.parse(decodeHTMLEntities(componentsJson));
-                var paramPlaceholders = [];
+                const components = JSON.parse(decodeHTMLEntities(componentsJson));
+                const paramPlaceholders = [];
 
-                components.forEach(function (component) {
-                    if (component.example && component.example.header_text_named_params) {
-                        component.example.header_text_named_params.forEach(function (param) {
-                            if (param && typeof param.param_name === 'string') {
-                                paramPlaceholders.push(param.param_name);
-                            }
-                        });
-                    }
-
-                    if (component.example && component.example.body_text_named_params) {
-                        component.example.body_text_named_params.forEach(function (param) {
-                            if (param && typeof param.param_name === 'string') {
-                                paramPlaceholders.push(param.param_name);
-                            }
-                        });
-                    }
+                components.forEach(component => {
+                    component.example?.header_text_named_params?.forEach(param => {
+                        if (param?.param_name) paramPlaceholders.push(param.param_name);
+                    });
+                    component.example?.body_text_named_params?.forEach(param => {
+                        if (param?.param_name) paramPlaceholders.push(param.param_name);
+                    });
                 });
 
-                return paramPlaceholders.join('~');
+                return paramPlaceholders;
             } catch (e) {
-                console.error('extractInputFormat error:', e);
-                return '';
+                console.error('extractPlaceholders error:', e);
+                return [];
             }
         }
 
         function renderPreview(componentsJson) {
             try {
-                var components = JSON.parse(decodeHTMLEntities(componentsJson));
-                var preview = '';
+                const components = JSON.parse(decodeHTMLEntities(componentsJson));
+                let preview = '';
 
-                components.forEach(function (component) {
+                components.forEach(component => {
                     if (component.type === 'HEADER' && component.format === 'TEXT') {
-                        var headerText = component.text;
-                        if (component.example && component.example.header_text_named_params) {
-                            component.example.header_text_named_params.forEach(function (param) {
-                                if (param && typeof param.param_name === 'string') {
-                                    var pattern = '{{' + param.param_name + '}}';
-                                    headerText = headerText.replace(pattern, param.example);
-                                }
-                            });
-                        }
-                        preview += '*' + headerText + '*\n\n';
+                        let headerText = component.text;
+                        component.example?.header_text_named_params?.forEach(param => {
+                            const pattern = `{{${param.param_name}}}`;
+                            headerText = headerText.replace(pattern, param.example);
+                        });
+                        preview += `*${headerText}*\n\n`;
                     }
 
                     if (component.type === 'BODY') {
-                        var bodyText = component.text;
-                        if (component.example && component.example.body_text_named_params) {
-                            component.example.body_text_named_params.forEach(function (param) {
-                                if (param && typeof param.param_name === 'string') {
-                                    var pattern = '{{' + param.param_name + '}}';
-                                    bodyText = bodyText.replace(pattern, param.example);
-                                }
-                            });
-                        }
-                        preview += bodyText + '\n\n';
+                        let bodyText = component.text;
+                        component.example?.body_text_named_params?.forEach(param => {
+                            const pattern = `{{${param.param_name}}}`;
+                            bodyText = bodyText.replace(pattern, param.example);
+                        });
+                        preview += `${bodyText}\n\n`;
                     }
 
                     if (component.type === 'FOOTER') {
-                        preview += '_' + component.text + '_\n\n';
+                        preview += `_${component.text}_\n\n`;
                     }
 
                     if (component.type === 'BUTTONS' && Array.isArray(component.buttons)) {
                         preview += '🔘 Buttons:\n';
-                        component.buttons.forEach(function (button) {
+                        component.buttons.forEach(button => {
                             if (button.type === 'COPY_CODE') {
-                                preview += '- 📋 ' + button.text + ' (copies: ' + (button.example && button.example[0] ? button.example[0] : 'CODE') + ')\n';
+                                preview += `- 📋 ${button.text} (copies: ${button.example?.[0] || 'CODE'})\n`;
                             } else if (button.type === 'URL') {
-                                preview += '- 🌐 ' + button.text + ': ' + button.url + '\n';
+                                preview += `- 🌐 ${button.text}: ${button.url}\n`;
                             } else {
-                                preview += '- 🔘 ' + button.text + '\n';
+                                preview += `- 🔘 ${button.text}\n`;
                             }
                         });
                         preview += '\n';
@@ -154,24 +176,48 @@
             }
         }
 
-        function updateTemplateAndPreview() {
-            var selectedOption = templateSelect.options[templateSelect.selectedIndex];
+        function updateTemplateUI() {
+            const selectedOption = templateSelect.options[templateSelect.selectedIndex];
             if (!selectedOption) return;
 
-            var messageJson = selectedOption.getAttribute('data-message') || '';
+            const messageJson = selectedOption.getAttribute('data-message') || '';
+            const placeholders = extractPlaceholders(messageJson);
+            const previewText = renderPreview(messageJson);
 
-            // Populate input format
-            var inputFormat = extractInputFormat(messageJson);
-            templateContent.value = inputFormat;
-
-            // Show preview
-            var previewText = renderPreview(messageJson);
             previewDiv.textContent = previewText;
+            dynamicInputsContainer.innerHTML = '';
+            resolvedInput.value = '';
+
+            if (placeholders.length) {
+                placeholders.forEach((placeholder, index) => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'space-y-1';
+
+                    const label = document.createElement('label');
+                    label.className = 'block text-sm font-medium text-gray-700';
+                    label.textContent = placeholder;
+
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.className = 'form-control';
+                    input.placeholder = placeholder;
+                    input.dataset.index = index;
+
+                    input.addEventListener('input', () => {
+                        const allInputs = dynamicInputsContainer.querySelectorAll('input');
+                        const values = Array.from(allInputs).map(inp => inp.value.trim());
+                        resolvedInput.value = values.join('~');
+                    });
+
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(input);
+                    dynamicInputsContainer.appendChild(wrapper);
+                });
+            }
         }
 
-        templateSelect.addEventListener('change', updateTemplateAndPreview);
-
-        // Initial render on load
-        updateTemplateAndPreview();
+        templateSelect.addEventListener('change', updateTemplateUI);
+        updateTemplateUI(); // Run once on page load
     });
 </script>
+@endverbatim

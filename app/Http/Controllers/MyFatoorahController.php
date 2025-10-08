@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use MyFatoorah\Library\MyFatoorah;
 use MyFatoorah\Library\API\Payment\MyFatoorahPayment;
 use MyFatoorah\Library\API\Payment\MyFatoorahPaymentEmbedded;
@@ -131,6 +132,22 @@ class MyFatoorahController extends Controller
                 if ($order) {
                     $order->status = OrderStatus::Paid;
                     $order->save();
+                    
+                    Mail::raw(
+                        "New order received\n\n".
+                        "Order ID: {$order->id}\n".
+                        "Customer: {$data->CustomerName}\n".
+                        "Email: {$data->CustomerEmail}\n".
+                        "Mobile: {$data->CustomerMobile}\n".
+                        "Amount: {$data->InvoiceDisplayValue}\n".
+                        "Items:\n" . collect($order->items)->map(function ($item) {
+                            return "- {$item->product->name} x {$item->quantity}";
+                        })->implode("\n"),
+                        function ($message) {
+                            $message->to('difora5626@fenexy.com')
+                                    ->subject('New Paid Order Received');
+                        }
+                    );
 
                     // Deduct stock
                     foreach ($order->items as $item) {

@@ -60,7 +60,7 @@
                     <tbody>
                         @forelse ($products as $product)
                             <tr class="border-b border-gray-100 dark:border-gray-800">
-                                <td class="px-5 py-4 sm:px-6">{{ $loop->iteration }}</td>
+                                <td class="px-5 py-4 sm:px-6">{{ $products->firstItem() + $loop->index }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $product->name_en }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $product->sku }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ number_format($product->price, 3) }}</td>
@@ -72,9 +72,10 @@
                                 </td>
                                 <td class="px-5 py-4 sm:px-6 flex gap-2">
                                     @if (auth()->user()->can('products.edit'))
-                                        <a href="{{ route('admin.products.edit', $product->id) }}" class="btn-default">
+                                        <a href="{{ route('admin.products.edit', [$product->id, 'page' => request()->get('page')]) }}" class="btn-default">
                                             <i class="bi bi-pencil"></i>
                                         </a>
+
                                     @endif
                                     @if (auth()->user()->can('products.delete'))
                                         <form action="{{ route('admin.products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('{{ __('Are you sure?') }}');">
@@ -99,7 +100,11 @@
 
                 <div class="my-4 px-4 sm:px-6">
                     {{ $products->links() }}
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        {{ __('Total Stock') }}: <span class="font-semibold">{{ $totalStock }}</span>
+                    </p>
                 </div>
+
             </div>
         </div>
     </div>
