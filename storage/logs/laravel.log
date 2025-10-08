@@ -1,81 +1,186 @@
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Dashboard"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Products"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Products"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Orders"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Orders"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Customers"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Customers"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Marketing"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Marketing"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"User"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"User"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Settings"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Settings"} 
-[2025-10-08 10:37:49] local.INFO: Attempting to add menu item {"label":"Logout"} 
-[2025-10-08 10:37:49] local.INFO: User has permission for menu item {"label":"Logout"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Dashboard"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Products"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Products"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Orders"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Orders"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Customers"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Customers"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Marketing"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Marketing"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"User"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"User"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Settings"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Settings"} 
-[2025-10-08 10:37:59] local.INFO: Attempting to add menu item {"label":"Logout"} 
-[2025-10-08 10:37:59] local.INFO: User has permission for menu item {"label":"Logout"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Dashboard"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Products"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Products"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Orders"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Orders"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Customers"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Customers"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Marketing"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Marketing"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"User"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"User"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Settings"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Settings"} 
-[2025-10-08 10:38:07] local.INFO: Attempting to add menu item {"label":"Logout"} 
-[2025-10-08 10:38:07] local.INFO: User has permission for menu item {"label":"Logout"} 
-[2025-10-08 10:38:15] local.INFO: Fetched WhatsApp templates successfully. {"count":3} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Dashboard"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Products"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Products"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Orders"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Orders"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Customers"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Customers"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Marketing"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Marketing"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"User"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"User"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Settings"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Settings"} 
-[2025-10-08 10:38:15] local.INFO: Attempting to add menu item {"label":"Logout"} 
-[2025-10-08 10:38:15] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:09:22] local.INFO: Fetched WhatsApp templates successfully. {"count":3} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:09:22] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:09:22] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:10:16] local.INFO: Fetched WhatsApp templates successfully. {"count":3} 
+[2025-10-08 11:10:16] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:10:17] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:10:17] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:12:06] local.INFO: Outbound message stored for: 96597029724  
+[2025-10-08 11:12:06] local.INFO: WhatsApp message sent successfully to 96597029724 {"message_id":"wamid.HBgLOTY1OTcwMjk3MjQVAgARGBI4NzIzMDQ0MzUyNDMxODJEMzkA","payload":{"messaging_product":"whatsapp","recipient_type":"individual","to":"96597029724","type":"template","template":{"name":"sale_offer","language":{"code":"en"},"components":[{"type":"header","parameters":[{"parameter_name":"offer_title","type":"text","text":"heading"}]},{"type":"body","parameters":[{"parameter_name":"offer_description","type":"text","text":"description"},{"parameter_name":"coupon","type":"text","text":"coupon10"}]},{"type":"button","index":0,"sub_type":"COPY_CODE","parameters":[{"parameter_name":"coupon_code","type":"coupon_code","coupon_code":"coupon10"}]}]}}} 
+[2025-10-08 11:12:10] local.INFO: Outbound message stored for: 96560713004  
+[2025-10-08 11:12:10] local.INFO: WhatsApp message sent successfully to 96560713004 {"message_id":"wamid.HBgLOTY1NjA3MTMwMDQVAgARGBI2MDhDNzAwMzAyQUUzQzJGNDMA","payload":{"messaging_product":"whatsapp","recipient_type":"individual","to":"96560713004","type":"template","template":{"name":"sale_offer","language":{"code":"en"},"components":[{"type":"header","parameters":[{"parameter_name":"offer_title","type":"text","text":"heading"}]},{"type":"body","parameters":[{"parameter_name":"offer_description","type":"text","text":"description"},{"parameter_name":"coupon","type":"text","text":"coupon10"}]},{"type":"button","index":0,"sub_type":"COPY_CODE","parameters":[{"parameter_name":"coupon_code","type":"coupon_code","coupon_code":"coupon10"}]}]}}} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:12:14] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:12:14] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:14:59] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:14:59] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:15:11] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:15:11] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:15:14] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:15:14] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:15:27] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:15:27] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:15:31] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:15:31] local.INFO: User has permission for menu item {"label":"Logout"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Dashboard"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Products"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Products"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Orders"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Orders"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"WhatsApp Chats"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Customers"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Customers"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Marketing"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Marketing"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"User"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"User"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Roles & Permissions"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Settings"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Settings"} 
+[2025-10-08 11:15:45] local.INFO: Attempting to add menu item {"label":"Logout"} 
+[2025-10-08 11:15:45] local.INFO: User has permission for menu item {"label":"Logout"} 

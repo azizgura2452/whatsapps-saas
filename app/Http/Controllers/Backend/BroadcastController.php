@@ -67,7 +67,8 @@ class BroadcastController extends Controller
                     $number,
                     $params,
                     $request->whatsapp_template_id,
-                    'en'
+                    'en',
+                    $broadcast->id
                 );
                 sleep(3);
             } catch (\Throwable $e) {

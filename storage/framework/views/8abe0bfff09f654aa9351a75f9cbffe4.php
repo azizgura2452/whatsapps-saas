@@ -72,7 +72,7 @@
                             </div>
 
                             <div id="dynamicInputsContainer" class="space-y-4"></div>
-                            <input type="hidden" name="custom_template" id="resolved_template_values">
+                            <input type="text" name="custom_template" id="resolved_template_values">
 
                             <div>
                                 <label class="block text-sm font-medium"><?php echo e(__('Preview')); ?></label>

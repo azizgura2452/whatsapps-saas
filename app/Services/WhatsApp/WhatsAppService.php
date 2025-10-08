@@ -47,7 +47,7 @@ class WhatsAppService
         ]);
     }
 
-    public function sendMarketingTemplate(string $to, array $params, string $templateName = 'sale_offer', string $languageCode = 'en')
+    public function sendMarketingTemplate(string $to, array $params, string $templateName = 'sale_offer', string $languageCode = 'en', ?int $broadcastId = null)
     {
         return $this->sendRequest([
             'messaging_product' => 'whatsapp',
@@ -99,7 +99,7 @@ class WhatsAppService
                     ]
                 ]
             ]
-        ]);
+        ], $broadcastId);
     }
 
 
@@ -258,15 +258,30 @@ class WhatsAppService
     /**
      * Send HTTP request to WhatsApp API
      */
-    protected function sendRequest(array $payload)
+    protected function sendRequest(array $payload, ?int $broadcastId = null)
     {
+        $customerObj = $this->customerService->findByWhatsapp($payload['to']);
+        $customerId = $customerObj ? $customerObj->id : null;
+
         try {
             $response = Http::withToken($this->token)
                 ->withOptions(['verify' => false])
                 ->post("https://graph.facebook.com/{$this->graph_version}/{$this->phoneId}/messages", $payload);
 
             if (!$response->successful()) {
-                Log::error('WhatsApp API error:', $response->json());
+                $errorData = $response->json();
+                Log::error('WhatsApp API error:', $errorData);
+
+                // Store failed message
+                app(WhatsAppController::class)->storeOutboundMessage(
+                    $payload['to'],
+                    $payload,
+                    null,
+                    $customerId,
+                    $broadcastId,
+                    'failed' // ADD STATUS PARAMETER
+                );
+
                 return response()->json(['status' => 'error', 'message' => 'Failed to send message'], 500);
             }
 
@@ -274,12 +289,8 @@ class WhatsAppService
 
             if ($response->successful() && isset($responseData['messages'][0]['id'])) {
                 $messageId = $responseData['messages'][0]['id'];
-
-                $customerObj = $this->customerService->findByWhatsapp($payload['to']);
-                $customerId = $customerObj ? $customerObj->id : null;
-
                 // Store outbound message in database
-                app(WhatsAppController::class)->storeOutboundMessage($payload['to'], $payload, $messageId, $customerId);
+                app(WhatsAppController::class)->storeOutboundMessage($payload['to'], $payload, $messageId, $customerId, $broadcastId, 'sent');
 
                 Log::info("WhatsApp message sent successfully to {$payload['to']}", [
                     'message_id' => $messageId,
@@ -290,6 +301,17 @@ class WhatsAppService
             return response()->json(['status' => 'sent', 'message_id' => $response->json()['messages'][0]['id'] ?? null]);
         } catch (\Exception $e) {
             Log::error('WhatsApp API exception: ' . $e->getMessage());
+
+            // Store failed message on exception
+            app(WhatsAppController::class)->storeOutboundMessage(
+                $payload['to'],
+                $payload,
+                null,
+                $customerId,
+                $broadcastId,
+                'failed' // ADD STATUS PARAMETER
+            );
+
             return response()->json(['status' => 'error', 'message' => 'Exception occurred'], 500);
         }
     }
@@ -369,7 +391,7 @@ class WhatsAppService
 
             return [
                 'mime_type' => $mime,
-                'content'   => $fileResponse->body(),
+                'content' => $fileResponse->body(),
             ];
 
         } catch (\Exception $e) {

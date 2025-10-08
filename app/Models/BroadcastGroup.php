@@ -36,6 +36,6 @@ class BroadcastGroup extends Model
 
     public function getCustomerPhoneNumbers(): array
     {
-        return $this->customers()->pluck('phone')->toArray();
+        return $this->customers()->pluck('whatsapp_number')->toArray();
     }
 }

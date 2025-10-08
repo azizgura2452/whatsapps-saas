@@ -12,6 +12,7 @@ class WhatsAppMessage extends Model
     
     protected $fillable = [
         'conversation_id',
+        'broadcast_id',
         'whatsapp_message_id',
         'phone_number',
         'direction',
@@ -82,5 +83,10 @@ class WhatsAppMessage extends Model
             ->where('direction', 'outbound')
             ->where('created_at', '>=', now()->subMinutes($minutes))
             ->exists();
+    }
+
+    public function broadcast()
+    {
+        return $this->belongsTo(Broadcast::class);
     }
 }

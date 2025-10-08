@@ -199,7 +199,7 @@ class WhatsAppController extends Controller
     /**
      * Store outbound message in database
      */
-    public function storeOutboundMessage(string $phoneNumber, array $messageData, string $whatsappMessageId = null, int $customerId = null): void
+    public function storeOutboundMessage(string $phoneNumber, array $messageData, string $whatsappMessageId = null, int $customerId = null, ?int $broadcastId = null, string $status = null): void
     {
         try {
             // Get or create conversation
@@ -207,6 +207,7 @@ class WhatsAppController extends Controller
 
             WhatsAppMessage::create([
                 'conversation_id' => $conversation->id,
+                'broadcast_id' => $broadcastId,
                 'whatsapp_message_id' => $whatsappMessageId,
                 'phone_number' => $phoneNumber,
                 'direction' => 'outbound',
@@ -214,7 +215,7 @@ class WhatsAppController extends Controller
                 'content' => $this->extractOutboundContent($messageData),
                 'raw_data' => json_encode($messageData),
                 'timestamp' => time(),
-                'status' => 'sent'
+                'status' => $status
             ]);
 
             Log::info('Outbound message stored for: ' . $phoneNumber);
