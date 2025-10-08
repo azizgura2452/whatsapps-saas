@@ -6,7 +6,7 @@
 <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
     <h2 class="text-xl font-semibold mb-4">{{ __('Create Broadcast Group') }}</h2>
 
-    <form action="{{ route('admin.broadcast-groups.store') }}" method="POST">
+    <form action="{{ route('admin.broadcast-groups.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
 
         {{-- Group Name --}}
@@ -21,8 +21,38 @@
             <textarea name="description" class="w-full border rounded px-3 py-2"></textarea>
         </div>
 
+        {{-- Import Customers Section --}}
+        <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+            <h3 class="font-medium mb-3 flex items-center">
+                <i class="bi bi-file-earmark-arrow-up mr-2"></i>
+                {{ __('Import Customers') }}
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                {{ __('Upload a CSV file with customer data. Required column: phone or phone_number. Optional: name, email, and any custom attributes.') }}
+            </p>
+            
+            <div class="mb-3">
+                <label class="block text-sm font-medium mb-2">{{ __('CSV File') }}</label>
+                <input type="file" name="customer_csv" accept=".csv,.txt" 
+                       class="w-full border rounded px-3 py-2 bg-white dark:bg-gray-800">
+                <small class="text-gray-500 dark:text-gray-400">
+                    {{ __('Max file size: 10MB') }}
+                </small>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 p-3 rounded border">
+                <p class="text-xs font-semibold mb-2">{{ __('CSV Format Example:') }}</p>
+                <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-x-auto">phone,name,email,city,age
++1234567890,John Doe,john@example.com,New York,30
++0987654321,Jane Smith,jane@example.com,Los Angeles,25</pre>
+            </div>
+        </div>
+
         {{-- Conditions --}}
-        <h3 class="font-medium mb-2">{{ __('Conditions') }}</h3>
+        <h3 class="font-medium mb-2">{{ __('Filter Conditions (Optional)') }}</h3>
+        <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+            {{ __('Add conditions to filter customers dynamically based on their attributes.') }}
+        </p>
         <div id="conditions-container" class="space-y-2"></div>
 
         <button type="button" id="add-condition" class="btn-default mt-2">
@@ -101,7 +131,6 @@ document.addEventListener('change', function(e){
                             valSelect.appendChild(opt);
                         });
                     } else {
-                        // if no predefined values, allow free text
                         let opt = document.createElement('option');
                         opt.value = '';
                         opt.textContent = '{{ __("No predefined values – type manually") }}';

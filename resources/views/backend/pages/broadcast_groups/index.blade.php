@@ -52,6 +52,9 @@
                                 {{ __('Description') }}
                             </th>
                             <th class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">
+                                {{ __('Customers') }}
+                            </th>
+                            <th class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">
                                 {{ __('Conditions') }}
                             </th>
                             <th class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5" width="15%">
@@ -66,6 +69,12 @@
                                 <td class="px-5 py-4 sm:px-6">{{ $group->name }}</td>
                                 <td class="px-5 py-4 sm:px-6">{{ $group->description ?? '-' }}</td>
                                 <td class="px-5 py-4 sm:px-6">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                                        <i class="bi bi-people mr-1"></i>
+                                        {{ $group->getCustomerCount() }}
+                                    </span>
+                                </td>
+                                <td class="px-5 py-4 sm:px-6">
                                     @forelse($group->conditions as $cond)
                                         <span class="inline-block text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 mr-1 mb-1">
                                             {{ $cond->field }} {{ $cond->operator }} {{ $cond->value }}
@@ -76,7 +85,8 @@
                                 </td>
                                 <td class="px-5 py-4 sm:px-6 flex gap-2">
                                     <a href="{{ route('admin.broadcast-groups.edit', $group->id) }}" 
-                                       class="btn-default !p-2">
+                                       class="btn-default !p-2"
+                                       title="{{ __('Edit') }}">
                                         <i class="bi bi-pencil"></i>
                                     </a>
 
@@ -85,7 +95,8 @@
                                           onsubmit="return confirm('{{ __('Are you sure you want to delete this group?') }}')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn-danger !p-2">
+                                        <button type="submit" class="btn-danger !p-2"
+                                                title="{{ __('Delete') }}">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -93,7 +104,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <p class="text-gray-500 dark:text-gray-400">{{ __('No groups found') }}</p>
                                 </td>
                             </tr>

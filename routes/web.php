@@ -96,8 +96,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
 
     Route::resource('customers', CustomersController::class);
     Route::resource('whatsapp-templates', WhatsAppTemplatesController::class);
+    // Broadcasts
     Route::resource('broadcasts', BroadcastController::class);
+    
+    // Broadcast Groups
     Route::resource('broadcast-groups', BroadcastGroupController::class);
+    Route::get('broadcast-groups-template/download', [BroadcastGroupController::class, 'downloadTemplate'])
+        ->name('broadcast-groups.template');
+    Route::post('broadcast-groups/{id}/import', [BroadcastGroupController::class, 'importCustomers'])
+        ->name('broadcast-groups.import');
 
     Route::resource('products', ProductController::class)->except(['show'])->names('products');
     Route::get('products/{product}', [ProductController::class, 'show'])->name('products.show');

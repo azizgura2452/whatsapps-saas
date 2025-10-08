@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Customer extends Model
 {
@@ -32,5 +33,11 @@ class Customer extends Model
     public function attributes()
     {
         return $this->hasMany(CustomerAttribute::class);
+    }
+
+    public function broadcastGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(BroadcastGroup::class, 'broadcast_group_customers')
+            ->withTimestamps();
     }
 }

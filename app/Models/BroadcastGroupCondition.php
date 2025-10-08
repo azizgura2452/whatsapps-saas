@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BroadcastGroupCondition extends Model
 {
@@ -13,8 +14,8 @@ class BroadcastGroupCondition extends Model
         'value',
     ];
 
-    public function group()
+    public function group(): BelongsTo
     {
-        return $this->belongsTo(BroadcastGroup::class);
+        return $this->belongsTo(BroadcastGroup::class, 'broadcast_group_id');
     }
 }

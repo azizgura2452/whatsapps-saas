@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
 import react from '@vitejs/plugin-react';
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite';
 import collectModuleAssetsPaths from "./vite-module-loader";
 
 let paths = [
@@ -23,7 +23,13 @@ export default defineConfig({
     plugins: [
         laravel({
             input: allPaths,
-            refresh: true,
+            refresh: [
+                'routes/**',
+                'resources/views/**',
+                'app/Http/Controllers/**',
+                'Modules/**/Resources/views/**',
+                '!storage/**',
+            ],
         }),
         react(),
         tailwindcss(),
@@ -33,10 +39,29 @@ export default defineConfig({
         // drop: ['console', 'debugger'],
     },
     build: {
-    outDir: 'public/build',
-    manifest: true,
-    rollupOptions: {
-      input: 'resources/js/app.js',
+        outDir: 'public/build',
+        manifest: true,
+        rollupOptions: {
+            input: 'resources/js/app.js',
+        },
     },
-  },
+    server: {
+        hmr: {
+            host: 'localhost',
+        },
+        watch: {
+            usePolling: false,
+            ignored: [
+                '**/storage/logs/**',
+                '**/storage/framework/**',
+                '**/storage/app/**',
+                '**/node_modules/**',
+                '**/vendor/**',
+                '**/.git/**',
+                '**/public/build/**',
+                '**/.env',
+                '**/*.log',
+            ],
+        },
+    },
 });

@@ -10,6 +10,13 @@
       0 => 'Laravel\\Pulse\\PulseServiceProvider',
     ),
   ),
+  'laravel/sail' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'Laravel\\Sail\\SailServiceProvider',
+    ),
+  ),
   'laravel/tinker' => 
   array (
     'providers' => 
@@ -35,11 +42,25 @@
       0 => 'Livewire\\LivewireServiceProvider',
     ),
   ),
+  'myfatoorah/laravel-package' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'MyFatoorah\\LaravelPackage\\MyFatoorahServiceProvider',
+    ),
+  ),
   'nesbot/carbon' => 
   array (
     'providers' => 
     array (
       0 => 'Carbon\\Laravel\\ServiceProvider',
+    ),
+  ),
+  'nunomaduro/collision' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     ),
   ),
   'nunomaduro/termwind' => 
@@ -58,6 +79,17 @@
     'providers' => 
     array (
       0 => 'Nwidart\\Modules\\LaravelModulesServiceProvider',
+    ),
+  ),
+  'spatie/laravel-ignition' => 
+  array (
+    'aliases' => 
+    array (
+      'Flare' => 'Spatie\\LaravelIgnition\\Facades\\Flare',
+    ),
+    'providers' => 
+    array (
+      0 => 'Spatie\\LaravelIgnition\\IgnitionServiceProvider',
     ),
   ),
   'spatie/laravel-permission' => 

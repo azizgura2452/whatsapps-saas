@@ -35,64 +35,115 @@
 
         <div class="space-y-6">
             <div class="rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-
                 <div class="p-5 space-y-6 border-t border-gray-100 dark:border-gray-800 sm:p-6">
-        @include('backend.layouts.partials.messages')
+                    @include('backend.layouts.partials.messages')
 
-        <form action="{{ route('admin.broadcasts.store') }}" method="POST">
-            @csrf
-            <div class="space-y-6">
-                <div>
-                    <label for="whatsapp_template_name" class="block text-sm font-medium text-gray-700 dark:text-gray-400">{{ __('Title') }}</label>
-                    <input type="text" name="whatsapp_template_name" id="whatsapp_template_name" required value="{{ old('whatsapp_template_name') }}" placeholder="{{ __('Enter broadcast title') }}" class="form-input form-control">
-                </div>
-                <div>
-                    <label for="whatsapp_template_id" class="block text-sm font-medium">Template</label>
-                    <select name="whatsapp_template_id" id="whatsapp_template_id" class="form-control" required>
-                        @foreach ($templates as $template)
-                            <option value="{{ $template['name'] }}"
-                                    data-message="{{ htmlentities(json_encode($template['components'])) }}">
-                                {{ $template['name'] }} ({{ $template['language'] }})
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
+                    <form action="{{ route('admin.broadcasts.store') }}" method="POST">
+                        @csrf
+                        <div class="space-y-6">
+                            <div>
+                                <label for="whatsapp_template_name" class="block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                    {{ __('Title') }}
+                                </label>
+                                <input type="text" name="whatsapp_template_name" id="whatsapp_template_name" required 
+                                       value="{{ old('whatsapp_template_name') }}" 
+                                       placeholder="{{ __('Enter broadcast title') }}" 
+                                       class="form-input form-control">
+                            </div>
 
-                <div id="dynamicInputsContainer" class="space-y-4"></div>
-                <input type="hidden" name="custom_template" id="resolved_template_values">
+                            <div>
+                                <label for="whatsapp_template_id" class="block text-sm font-medium">
+                                    {{ __('Template') }}
+                                </label>
+                                <select name="whatsapp_template_id" id="whatsapp_template_id" class="form-control" required>
+                                    @foreach ($templates as $template)
+                                        <option value="{{ $template['name'] }}"
+                                                data-message="{{ htmlentities(json_encode($template['components'])) }}">
+                                            {{ $template['name'] }} ({{ $template['language'] }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
 
+                            <div id="dynamicInputsContainer" class="space-y-4"></div>
+                            <input type="hidden" name="custom_template" id="resolved_template_values">
 
-                <!-- <div>
-                    <label class="block text-sm font-medium" for="custom_template">Custom Message</label>
-                    <textarea name="custom_template" id="custom_template" class="form-control" rows="6" required style="min-height: 100px">{{ old('custom_template') }}</textarea>
-                </div> -->
+                            <div>
+                                <label class="block text-sm font-medium">{{ __('Preview') }}</label>
+                                <div id="template_preview" class="p-4 bg-gray-100 dark:bg-gray-800 border rounded text-sm whitespace-pre-wrap"></div>
+                            </div>
 
-                <div>
-                    <label class="block text-sm font-medium">Preview</label>
-                    <div id="template_preview" class="p-4 bg-gray-100 border rounded text-sm whitespace-pre-wrap"></div>
-                </div>
+                            {{-- Recipient Source Selection --}}
+                            <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                                <h3 class="font-medium mb-3">{{ __('Select Recipients') }}</h3>
+                                
+                                <div class="space-y-3">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="recipient_source" value="all" 
+                                               class="form-radio" checked onchange="toggleRecipientInputs()">
+                                        <span>{{ __('All Customers') }}</span>
+                                    </label>
 
-                <div>
-                    <label class="block text-sm font-medium">Other Numbers (comma separated)</label>
-                    <textarea name="custom_recipients" class="form-control" rows="3">{{ old('custom_recipients') }}</textarea>
-                    <small class="text-gray-500">Leave blank to send to all customers</small>
-                </div>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="recipient_source" value="group" 
+                                               class="form-radio" onchange="toggleRecipientInputs()">
+                                        <span>{{ __('Broadcast Group') }}</span>
+                                    </label>
 
-                <div class="flex gap-4">
-                    <button type="submit" class="btn-primary">Save</button>
-                    <a href="{{ route('admin.broadcasts.index') }}" class="btn-default">Cancel</a>
-                </div>
-            </div>
-        </form>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="recipient_source" value="custom" 
+                                               class="form-radio" onchange="toggleRecipientInputs()">
+                                        <span>{{ __('Custom Numbers') }}</span>
+                                    </label>
+                                </div>
+
+                                {{-- Broadcast Group Selection --}}
+                                <div id="group_selection" class="mt-4 hidden">
+                                    <label class="block text-sm font-medium mb-2">{{ __('Select Group') }}</label>
+                                    <select name="broadcast_group_id" class="form-control">
+                                        <option value="">{{ __('-- Select a group --') }}</option>
+                                        @foreach($broadcastGroups as $group)
+                                            <option value="{{ $group->id }}">
+                                                {{ $group->name }} ({{ $group->getCustomerCount() }} customers)
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                {{-- Custom Numbers Input --}}
+                                <div id="custom_numbers" class="mt-4 hidden">
+                                    <label class="block text-sm font-medium mb-2">
+                                        {{ __('Phone Numbers (comma separated)') }}
+                                    </label>
+                                    <textarea name="custom_recipients" class="form-control" rows="3" 
+                                              placeholder="+1234567890, +0987654321, ...">{{ old('custom_recipients') }}</textarea>
+                                    <small class="text-gray-500 dark:text-gray-400">
+                                        {{ __('Enter phone numbers separated by commas') }}
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-4">
+                                <button type="submit" class="btn-primary">{{ __('Send Broadcast') }}</button>
+                                <a href="{{ route('admin.broadcasts.index') }}" class="btn-default">{{ __('Cancel') }}</a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
-
     </div>
 @endsection
 
+@push('scripts')
 @verbatim
 <script>
+    function toggleRecipientInputs() {
+        const source = document.querySelector('input[name="recipient_source"]:checked').value;
+        document.getElementById('group_selection').classList.toggle('hidden', source !== 'group');
+        document.getElementById('custom_numbers').classList.toggle('hidden', source !== 'custom');
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const templateSelect = document.getElementById('whatsapp_template_id');
         const previewDiv = document.getElementById('template_preview');
@@ -194,7 +245,7 @@
                     wrapper.className = 'space-y-1';
 
                     const label = document.createElement('label');
-                    label.className = 'block text-sm font-medium text-gray-700';
+                    label.className = 'block text-sm font-medium text-gray-700 dark:text-gray-400';
                     label.textContent = placeholder;
 
                     const input = document.createElement('input');
@@ -217,7 +268,8 @@
         }
 
         templateSelect.addEventListener('change', updateTemplateUI);
-        updateTemplateUI(); // Run once on page load
+        updateTemplateUI();
     });
 </script>
 @endverbatim
+@endpush
