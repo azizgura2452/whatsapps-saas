@@ -1,6 +1,8 @@
 <?php
+
 namespace App\Services\WhatsApp;
 
+use App\Models\Business;
 use App\Http\Controllers\WhatsAppController;
 use App\Services\CustomerService;
 use Illuminate\Support\Facades\Http;
@@ -8,34 +10,21 @@ use Illuminate\Support\Facades\Log;
 
 class WhatsAppService
 {
-    protected $token;
-    protected $phoneId;
-    protected $catalogId;
     protected $conversationState;
     protected $customerService;
-    protected $wabaId;
     protected $graph_version;
 
-    public function __construct(ConversationStateService $conversationState = null, CustomerService $customerService)
+    public function __construct(ConversationStateService $conversationState, CustomerService $customerService)
     {
-        $this->token = config('services.whatsapp.access_token');
-        $this->phoneId = config('services.whatsapp.phone_number_id');
-        $this->catalogId = config('services.whatsapp.catalog_id');
         $this->conversationState = $conversationState;
         $this->customerService = $customerService;
-        $this->wabaId = config('services.whatsapp.business_account_id');
-        $this->graph_version = config('services.graph_version');
-    }
-
-    public function getAllCustomerNumbers(): array
-    {
-        return $this->customerService->getAllPhoneNumbers(); // assumes such a method exists
+        $this->graph_version = config('services.graph_version', 'v18.0');
     }
 
     /**
      * Send a text message
      */
-    public function sendText(string $to, string $message)
+    public function sendText(string $to, Business $business, string $message)
     {
         return $this->sendRequest([
             'messaging_product' => 'whatsapp',
@@ -44,11 +33,195 @@ class WhatsAppService
             'text' => [
                 'body' => $message
             ]
-        ]);
+        ], $business);
     }
 
-    public function sendMarketingTemplate(string $to, array $params, string $templateName = 'sale_offer', string $languageCode = 'en', ?int $broadcastId = null)
+    /**
+     * Send interactive buttons
+     */
+    public function sendButtons(string $to, Business $business, string $bodyText, array $buttons, ?string $headerText = null)
     {
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'interactive',
+            'interactive' => [
+                'type' => 'button',
+                'body' => ['text' => $bodyText],
+                'action' => ['buttons' => $buttons]
+            ]
+        ];
+
+        if ($headerText) {
+            $payload['interactive']['header'] = [
+                'type' => 'text',
+                'text' => $headerText
+            ];
+        }
+
+        return $this->sendRequest($payload, $business);
+    }
+
+    /**
+     * Send a list message
+     */
+    public function sendList(string $to, Business $business, string $bodyText, array $sections, ?string $headerText = null)
+    {
+        $payload = [
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'interactive',
+            'interactive' => [
+                'type' => 'list',
+                'body' => ['text' => $bodyText],
+                'action' => [
+                    'button' => 'View Options',
+                    'sections' => $sections
+                ]
+            ]
+        ];
+
+        if ($headerText) {
+            $payload['interactive']['header'] = [
+                'type' => 'text',
+                'text' => $headerText
+            ];
+        }
+
+        return $this->sendRequest($payload, $business);
+    }
+
+    /**
+     * Send a single product
+     */
+    public function sendSingleProduct(string $to, Business $business, string $productId)
+    {
+        if (!$business->whatsapp_catalog_id) {
+            return $this->sendText($to, $business, 'Product catalog not configured.');
+        }
+
+        return $this->sendRequest([
+            'messaging_product' => 'whatsapp',
+            'to' => $to,
+            'type' => 'interactive',
+            'interactive' => [
+                'type' => 'product',
+                'body' => [
+                    'text' => 'Here is the product you requested:'
+                ],
+                'action' => [
+                    'catalog_id' => $business->whatsapp_catalog_id,
+                    'product_retailer_id' => $productId
+                ]
+            ]
+        ], $business);
+    }
+
+    /**
+     * Send catalog categories
+     */
+    public function sendCatalogCategories(string $to, Business $business)
+    {
+        $categories = $this->fetchCatalogCategories($business);
+
+        if (empty($categories)) {
+            return $this->sendText($to, $business, 'Unable to load catalog categories.');
+        }
+
+        $limitedCategories = array_slice($categories, 0, 10);
+
+        $sections = [
+            [
+                'title' => 'Select a category',
+                'rows' => array_map(function ($category) {
+                    return [
+                        'id' => 'cat_' . $category['id'],
+                        'title' => $category['name']
+                    ];
+                }, $limitedCategories)
+            ]
+        ];
+
+        return $this->sendList(
+            $to,
+            $business,
+            'Choose one of the categories below',
+            $sections,
+            'Product Categories'
+        );
+    }
+
+    /**
+     * Send products from category
+     */
+    public function sendProductsFromCategory(string $to, Business $business, string $categoryId)
+    {
+        $products = $this->fetchProductsFromCategory($business, $categoryId);
+
+        if (empty($products)) {
+            return $this->sendText($to, $business, 'No products found in this category.');
+        }
+
+        return $this->sendProductTemplate($to, $business, $products);
+    }
+
+    /**
+     * Send a product template message
+     */
+    public function sendProductTemplate(string $to, Business $business, array $products, string $templateName = 'varsity_catalogue_en_prod', string $languageCode = 'en_US')
+    {
+        $productItems = array_map(function ($product) {
+            return ['product_retailer_id' => $product['retailer_id']];
+        }, array_slice($products, 0, 30));
+
+        $thumbnailProductId = !empty($products) ? $products[0]['retailer_id'] : '';
+
+        return $this->sendRequest([
+            'messaging_product' => 'whatsapp',
+            'recipient_type' => 'individual',
+            'to' => $to,
+            'type' => 'template',
+            'template' => [
+                'name' => $templateName,
+                'language' => [
+                    'code' => $languageCode
+                ],
+                'components' => [
+                    [
+                        'type' => 'button',
+                        'sub_type' => 'mpm',
+                        'index' => 0,
+                        'parameters' => [
+                            [
+                                'type' => 'action',
+                                'action' => [
+                                    'thumbnail_product_retailer_id' => $thumbnailProductId,
+                                    'sections' => [
+                                        [
+                                            'title' => 'Featured Products',
+                                            'product_items' => $productItems
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ], $business);
+    }
+
+    /**
+     * Send marketing template
+     */
+    public function sendMarketingTemplate(
+        string $to, 
+        Business $business,
+        array $params, 
+        string $templateName = 'sale_offer', 
+        string $languageCode = 'en',
+        ?int $broadcastId = null
+    ) {
         return $this->sendRequest([
             'messaging_product' => 'whatsapp',
             'recipient_type' => 'individual',
@@ -99,136 +272,21 @@ class WhatsAppService
                     ]
                 ]
             ]
-        ], $broadcastId);
-    }
-
-
-    /**
-     * Send interactive buttons
-     */
-    public function sendButtons(string $to, string $bodyText, array $buttons, ?string $headerText = null)
-    {
-        $payload = [
-            'messaging_product' => 'whatsapp',
-            'to' => $to,
-            'type' => 'interactive',
-            'interactive' => [
-                'type' => 'button',
-                'body' => ['text' => $bodyText],
-                'action' => ['buttons' => $buttons]
-            ]
-        ];
-
-        if ($headerText) {
-            $payload['interactive']['header'] = [
-                'type' => 'text',
-                'text' => $headerText
-            ];
-        }
-
-        return $this->sendRequest($payload);
-    }
-
-
-    /**
-     * Send a list message
-     */
-    public function sendList(string $to, string $headerText, string $bodyText, array $sections)
-    {
-        return $this->sendRequest([
-            'messaging_product' => 'whatsapp',
-            'to' => $to,
-            'type' => 'interactive',
-            'interactive' => [
-                'type' => 'list',
-                'header' => ['type' => 'text', 'text' => $headerText],
-                'body' => ['text' => $bodyText],
-                'action' => [
-                    'button' => 'View Options',
-                    'sections' => $sections
-                ]
-            ]
-        ]);
-    }
-
-    /**
-     * Send a single product
-     */
-    public function sendSingleProduct(string $to, string $productId)
-    {
-        return $this->sendRequest([
-            'messaging_product' => 'whatsapp',
-            'to' => $to,
-            'type' => 'interactive',
-            'interactive' => [
-                'type' => 'product',
-                'body' => [
-                    'text' => 'Here is the product you requested:'
-                ],
-                'action' => [
-                    'catalog_id' => $this->catalogId,
-                    'product_retailer_id' => $productId
-                ]
-            ]
-        ]);
-    }
-
-    /**
-     * Send a product template message
-     */
-    public function sendProductTemplate(string $to, array $products, string $templateName = 'varsity_catalogue_en_prod', string $languageCode = 'en_US')
-    {
-        // Prepare product items (limit to 30 as per WhatsApp's limit)
-        $productItems = array_map(function ($product) {
-            return ['product_retailer_id' => $product['retailer_id']];
-        }, array_slice($products, 0, 30));
-
-        // Use the first product as thumbnail if available
-        $thumbnailProductId = !empty($products) ? $products[0]['retailer_id'] : '';
-
-        return $this->sendRequest([
-            'messaging_product' => 'whatsapp',
-            'recipient_type' => 'individual',
-            'to' => $to,
-            'type' => 'template',
-            'template' => [
-                'name' => $templateName,
-                'language' => [
-                    'code' => $languageCode
-                ],
-                'components' => [
-                    [
-                        'type' => 'button',
-                        'sub_type' => 'mpm',
-                        'index' => 0,
-                        'parameters' => [
-                            [
-                                'type' => 'action',
-                                'action' => [
-                                    'thumbnail_product_retailer_id' => $thumbnailProductId,
-                                    'sections' => [
-                                        [
-                                            'title' => 'Featured Products',
-                                            'product_items' => $productItems
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ]);
+        ], $business, $broadcastId);
     }
 
     /**
      * Fetch catalog categories
      */
-    public function fetchCatalogCategories()
+    public function fetchCatalogCategories(Business $business)
     {
-        $response = Http::withToken($this->token)
+        if (!$business->whatsapp_catalog_id) {
+            return [];
+        }
+
+        $response = Http::withToken($business->whatsapp_access_token)
             ->withOptions(['verify' => false])
-            ->get("https://graph.facebook.com/{$this->graph_version}/{$this->catalogId}/product_sets?fields=id,name");
+            ->get("https://graph.facebook.com/{$this->graph_version}/{$business->whatsapp_catalog_id}/product_sets?fields=id,name");
 
         if (!$response->ok()) {
             Log::error('Failed to fetch catalog categories:', $response->json());
@@ -241,9 +299,9 @@ class WhatsAppService
     /**
      * Fetch products from category
      */
-    public function fetchProductsFromCategory(string $categoryId)
+    public function fetchProductsFromCategory(Business $business, string $categoryId)
     {
-        $response = Http::withToken($this->token)
+        $response = Http::withToken($business->whatsapp_access_token)
             ->withOptions(['verify' => false])
             ->get("https://graph.facebook.com/{$this->graph_version}/$categoryId/products");
 
@@ -258,28 +316,27 @@ class WhatsAppService
     /**
      * Send HTTP request to WhatsApp API
      */
-    protected function sendRequest(array $payload, ?int $broadcastId = null)
+    protected function sendRequest(array $payload, Business $business, ?int $broadcastId = null)
     {
-        $customerObj = $this->customerService->findByWhatsapp($payload['to']);
+        $customerObj = $this->customerService->findByWhatsapp($payload['to'], $business->id);
         $customerId = $customerObj ? $customerObj->id : null;
 
         try {
-            $response = Http::withToken($this->token)
+            $response = Http::withToken($business->whatsapp_access_token)
                 ->withOptions(['verify' => false])
-                ->post("https://graph.facebook.com/{$this->graph_version}/{$this->phoneId}/messages", $payload);
+                ->post("https://graph.facebook.com/{$this->graph_version}/{$business->whatsapp_phone_number_id}/messages", $payload);
 
             if (!$response->successful()) {
                 $errorData = $response->json();
                 Log::error('WhatsApp API error:', $errorData);
 
-                // Store failed message
                 app(WhatsAppController::class)->storeOutboundMessage(
                     $payload['to'],
                     $payload,
+                    $business,
                     null,
-                    $customerId,
                     $broadcastId,
-                    'failed' // ADD STATUS PARAMETER
+                    'failed'
                 );
 
                 return response()->json(['status' => 'error', 'message' => 'Failed to send message'], 500);
@@ -289,27 +346,37 @@ class WhatsAppService
 
             if ($response->successful() && isset($responseData['messages'][0]['id'])) {
                 $messageId = $responseData['messages'][0]['id'];
-                // Store outbound message in database
-                app(WhatsAppController::class)->storeOutboundMessage($payload['to'], $payload, $messageId, $customerId, $broadcastId, 'sent');
+                
+                app(WhatsAppController::class)->storeOutboundMessage(
+                    $payload['to'], 
+                    $payload, 
+                    $business,
+                    $messageId, 
+                    $broadcastId, 
+                    'sent'
+                );
 
                 Log::info("WhatsApp message sent successfully to {$payload['to']}", [
                     'message_id' => $messageId,
-                    'payload' => $payload
+                    'business_id' => $business->id
                 ]);
             }
 
-            return response()->json(['status' => 'sent', 'message_id' => $response->json()['messages'][0]['id'] ?? null]);
+            return response()->json([
+                'status' => 'sent', 
+                'message_id' => $responseData['messages'][0]['id'] ?? null
+            ]);
+            
         } catch (\Exception $e) {
             Log::error('WhatsApp API exception: ' . $e->getMessage());
 
-            // Store failed message on exception
             app(WhatsAppController::class)->storeOutboundMessage(
                 $payload['to'],
                 $payload,
+                $business,
                 null,
-                $customerId,
                 $broadcastId,
-                'failed' // ADD STATUS PARAMETER
+                'failed'
             );
 
             return response()->json(['status' => 'error', 'message' => 'Exception occurred'], 500);
@@ -317,54 +384,37 @@ class WhatsAppService
     }
 
     /**
-     * Get conversation history for a phone number
+     * Get templates for business
      */
-    public function getConversationHistory(string $phoneNumber, int $limit = 50): array
-    {
-        return app(WhatsAppController::class)->getConversationHistory($phoneNumber, $limit);
-    }
-
-    /**
-     * Check if we can send a message (to prevent spam)
-     */
-    public function canSendMessage(string $phoneNumber, string $content): bool
-    {
-        return app(WhatsAppController::class)->canSendMessage($phoneNumber, $content);
-    }
-
-    public function getTemplates()
+    public function getTemplates(Business $business)
     {
         try {
-            $wabaId = $this->wabaId;
-            $response = Http::withToken($this->token)
+            $response = Http::withToken($business->whatsapp_access_token)
                 ->withOptions(['verify' => false])
-                ->get("https://graph.facebook.com/v22.0/{$wabaId}/message_templates");
+                ->get("https://graph.facebook.com/{$this->graph_version}/{$business->whatsapp_business_account_id}/message_templates");
 
             if (!$response->successful()) {
                 Log::error('WhatsApp Template API error:', $response->json());
-                return response()->json(['status' => 'error', 'message' => 'Failed to fetch templates'], 500);
+                return [];
             }
 
-            $templates = $response->json('data') ?? [];
-
-            Log::info('Fetched WhatsApp templates successfully.', [
-                'count' => count($templates)
-            ]);
-
-            return $templates;
+            return $response->json('data') ?? [];
+            
         } catch (\Exception $e) {
             Log::error('WhatsApp Template API exception: ' . $e->getMessage());
-            return response()->json(['status' => 'error', 'message' => 'Exception occurred'], 500);
+            return [];
         }
     }
 
-    public function downloadMedia(string $mediaId): ?array
+    /**
+     * Download media
+     */
+    public function downloadMedia(string $mediaId, Business $business): ?array
     {
         try {
-            // Step 1: Metadata
-            $metaResponse = Http::withToken($this->token)
+            $metaResponse = Http::withToken($business->whatsapp_access_token)
                 ->withOptions(['verify' => false])
-                ->get("https://graph.facebook.com/v22.0/{$mediaId}");
+                ->get("https://graph.facebook.com/{$this->graph_version}/{$mediaId}");
 
             if (!$metaResponse->successful()) {
                 Log::error("WhatsApp media metadata fetch failed", $metaResponse->json());
@@ -379,8 +429,7 @@ class WhatsAppService
                 return null;
             }
 
-            // Step 2: Download
-            $fileResponse = Http::withToken($this->token)
+            $fileResponse = Http::withToken($business->whatsapp_access_token)
                 ->withOptions(['verify' => false])
                 ->get($url);
 
@@ -399,5 +448,4 @@ class WhatsAppService
             return null;
         }
     }
-
 }

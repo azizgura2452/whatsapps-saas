@@ -54,6 +54,25 @@ class User extends Authenticatable
         return $this->hasMany(ActionLog::class, 'action_by');
     }
 
+    public function businesses()
+    {
+        return $this->hasMany(Business::class);
+    }
+
+    /**
+     * Get current business for the user
+     */
+    public function getCurrentBusiness()
+    {
+        $businessId = session('current_business_id');
+        
+        if ($businessId) {
+            return $this->businesses()->find($businessId);
+        }
+        
+        return $this->businesses()->first();
+    }
+
     /**
      * Send the password reset notification.
      *

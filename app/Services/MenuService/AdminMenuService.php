@@ -113,6 +113,62 @@ class AdminMenuService
             'route' => route('admin.orders.index'),
         ]);
 
+        // Add this after the Marketing menu item
+$this->addMenuItem([
+    'label' => __('Flow Builder'),
+    'iconClass' => 'bi bi-diagram-3 text-lg',
+    'id' => 'flow-builder-submenu',
+    'active' => Route::is('admin.flow-builder.*'),
+    'priority' => 15,
+    'permissions' => ['flow.create', 'flow.view', 'flow.edit', 'flow.delete'],
+    'children' => [
+        [
+            'label' => __('Flow Steps'),
+            'iconClass' => 'fa fa-list',
+            'route' => route('admin.flow-builder.index'),
+            'active' => Route::is('admin.flow-builder.index') || Route::is('admin.flow-builder.edit'),
+            'priority' => 20,
+            'permissions' => 'flow.view'
+        ],
+        [
+            'label' => __('New Flow Step'),
+            'iconClass' => 'fa fa-plus',
+            'route' => route('admin.flow-builder.create'),
+            'active' => Route::is('admin.flow-builder.create'),
+            'priority' => 10,
+            'permissions' => 'flow.create'
+        ]
+    ]
+]);
+
+        // Add Business Management menu
+        $this->addMenuItem([
+            'label' => __('Businesses'),
+            'iconClass' => 'bi bi-building text-lg',
+            'id' => 'businesses-submenu',
+            'active' => Route::is('admin.businesses.*'),
+            'priority' => 5,
+            'permissions' => ['business.create', 'business.view', 'business.edit', 'business.delete'],
+            'children' => [
+                [
+                    'label' => __('All Businesses'),
+                    'iconClass' => 'fa fa-list',
+                    'route' => route('admin.businesses.index'),
+                    'active' => Route::is('admin.businesses.index') || Route::is('admin.businesses.edit'),
+                    'priority' => 20,
+                    'permissions' => 'business.view'
+                ],
+                [
+                    'label' => __('New Business'),
+                    'iconClass' => 'fa fa-plus',
+                    'route' => route('admin.businesses.create'),
+                    'active' => Route::is('admin.businesses.create'),
+                    'priority' => 10,
+                    'permissions' => 'business.create'
+                ]
+            ]
+        ]);
+
         $this->addMenuItem([
             'label' => __('WhatsApp Chats'),
             'iconClass' => 'fa fa-whatsapp',

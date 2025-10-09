@@ -112,6 +112,24 @@ class PermissionService
                     'orders.delete',
                 ],
             ],
+            [
+                'group_name' => 'flow',
+                'permissions' => [
+                    'flow.create',
+                    'flow.view',
+                    'flow.edit',
+                    'flow.delete',
+                ],
+            ],
+            [
+                'group_name' => 'business',
+                'permissions' => [
+                    'business.create',
+                    'business.view',
+                    'business.edit',
+                    'business.delete',
+                ],
+            ],
         ];
 
         return $permissions;

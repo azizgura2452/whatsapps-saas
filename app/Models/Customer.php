@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Customer extends Model
@@ -13,6 +14,7 @@ class Customer extends Model
     const UPDATED_AT = 'modified_on';
 
     protected $fillable = [
+        'business_id',
         'name',
         'address',
         'whatsapp_number',
@@ -20,6 +22,11 @@ class Customer extends Model
         'birthday',
         'gender',
     ];
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(Business::class);
+    }
 
     public function orders()
     {
@@ -40,5 +47,11 @@ class Customer extends Model
     {
         return $this->belongsToMany(BroadcastGroup::class, 'broadcast_group_customers')
             ->withTimestamps();
+    }
+
+    // Scope to filter by business
+    public function scopeForBusiness($query, $businessId)
+    {
+        return $query->where('business_id', $businessId);
     }
 }

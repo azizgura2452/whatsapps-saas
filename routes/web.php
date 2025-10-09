@@ -19,9 +19,12 @@ use App\Http\Controllers\Backend\UserLoginAsController;
 use App\Http\Controllers\Backend\LocaleController;
 use App\Http\Controllers\Backend\ProductController;
 use App\Http\Controllers\Backend\WhatsAppTemplatesController;
+use App\Http\Controllers\Backend\BusinessController;
+use App\Http\Controllers\Backend\FlowBuilderController;
 use App\Http\Controllers\MyFatoorahController;
 use App\Http\Controllers\ProductFeedController;
 use App\Http\Controllers\Backend\WhatsAppChatboxController;
+use App\Http\Controllers\WhatsAppController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,9 +49,12 @@ Route::get('/fix-vite', function () {
     \Artisan::call('view:clear');
     \Artisan::call('route:clear');
     \Artisan::call('config:cache');
-
     return 'Config cleared and cached!';
 });
+
+// WhatsApp Webhook Routes (Public)
+Route::get('/whatsapp/webhook', [WhatsAppController::class, 'verifyWebhook'])->name('whatsapp.webhook.verify');
+Route::post('/whatsapp/webhook', [WhatsAppController::class, 'handleWebhook'])->name('whatsapp.webhook.handle');
 
 // Other explicit routes
 Route::get('/', 'HomeController@redirectAdmin')->name('index');
@@ -62,9 +68,18 @@ Route::get('/product-feed', [ProductFeedController::class, 'generateFeed']);
 Route::get('/locale/{lang}', [LocaleController::class, 'switch'])->name('locale.switch');
 
 // Admin routes
-Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth', 'set.business.context']], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/testmail', [DashboardController::class, 'sendTestEmail'])->name('dashboard.sendEmail');
+    
+    // Business Management
+    Route::resource('businesses', BusinessController::class);
+    Route::post('businesses/{id}/switch', [BusinessController::class, 'switchBusiness'])->name('businesses.switch');
+    
+    // Flow Builder
+    Route::resource('flow-builder', FlowBuilderController::class);
+    Route::post('flow-builder/reorder', [FlowBuilderController::class, 'reorder'])->name('flow-builder.reorder');
+    
     Route::resource('roles', RolesController::class);
 
     Route::get('/permissions', [PermissionsController::class, 'index'])->name('permissions.index');
@@ -99,12 +114,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
         ->name('customers.download-template');
     Route::resource('customers', CustomersController::class);
 
-    
     Route::resource('whatsapp-templates', WhatsAppTemplatesController::class);
+    
     // Broadcasts
     Route::resource('broadcasts', BroadcastController::class);
     Route::get('broadcasts/{id}/report', [BroadcastController::class, 'report'])
         ->name('broadcasts.report');
+    
     // Broadcast Groups
     Route::resource('broadcast-groups', BroadcastGroupController::class);
     Route::get('broadcast-groups-template/download', [BroadcastGroupController::class, 'downloadTemplate'])
@@ -120,11 +136,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
     Route::get('/action-log', [ActionLogController::class, 'index'])->name('actionlog.index');
-    // WhatsApp Chatbox (sidebar + AJAX chat pane)
+    
+    // WhatsApp Chatbox
     Route::get('whatsapp-chatbox', [WhatsAppChatboxController::class, 'index'])->name('whatsapp.chatbox');
     Route::get('whatsapp-chatbox/chat/{customer}', [WhatsAppChatboxController::class, 'chat'])->name('whatsapp.chatbox.chat');
-    // Note: polling will reuse existing route('admin.customers.messages', $customer)
-
     Route::get('whatsapp-chatbox/media/{mediaId}', [WhatsAppChatboxController::class, 'downloadMedia'])
         ->name('whatsapp.chatbox.media');
 });

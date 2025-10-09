@@ -35,35 +35,6 @@ class CustomerService
         return $customer;
     }
 
-    public function getOrCreateCustomer(array $data): Customer
-    {
-        $customer = Customer::firstOrCreate(
-            ['whatsapp_number' => $data['whatsapp_number']],
-            [
-                'name' => $data['name'] ?? null,
-                'address' => $data['address'] ?? null,
-                'birthday' => $data['birthday'] ?? null,
-                'gender' => $data['gender'] ?? null,
-                'created_on' => now(),
-                'modified_on' => now(),
-            ]
-        );
-
-        if (!empty($data['attributes'])) {
-            foreach ($data['attributes'] as $key => $value) {
-                if ($key && $value) {
-                    $customer->attributes()->updateOrCreate(
-                        ['key' => $key],
-                        ['value' => $value]
-                    );
-                }
-            }
-        }
-
-        return $customer;
-    }
-
-
     public function getCustomers(): LengthAwarePaginator
     {
         $search = request()->input('search');
@@ -131,14 +102,64 @@ class CustomerService
             ->paginate(config('settings.default_pagination') ?? 10);
     }
 
-    public function findByWhatsapp(string $whatsappNumber): ?Customer
+        /**
+     * Get or create customer by WhatsApp number
+     */
+    public function getOrCreateCustomer(array $data)
     {
-        return Customer::where('whatsapp_number', $whatsappNumber)->first();
+        $businessId = $data['business_id'] ?? null;
+        
+        if (!$businessId) {
+            throw new \Exception('Business ID is required');
+        }
+
+        return Customer::firstOrCreate(
+            [
+                'whatsapp_number' => $data['whatsapp_number'],
+                'business_id' => $businessId
+            ],
+            [
+                'name' => $data['name'] ?? null,
+                'address' => $data['address'] ?? null,
+                'email' => $data['email'] ?? null,
+                'business_id' => $businessId,
+            ]
+        );
     }
 
-    // In CustomerService.php
-    public function getAllPhoneNumbers(): array
+    /**
+     * Find customer by WhatsApp number and business
+     */
+    public function findByWhatsapp(string $whatsappNumber, ?int $businessId = null)
     {
-        return Customer::pluck('whatsapp_number')->filter()->unique()->toArray();
+        $query = Customer::where('whatsapp_number', $whatsappNumber);
+        
+        if ($businessId) {
+            $query->where('business_id', $businessId);
+        }
+        
+        return $query->first();
+    }
+
+    /**
+     * Get all phone numbers for a business
+     */
+    public function getAllPhoneNumbers(?int $businessId = null): array
+    {
+        $query = Customer::query();
+        
+        if ($businessId) {
+            $query->where('business_id', $businessId);
+        }
+        
+        return $query->pluck('whatsapp_number')->toArray();
+    }
+
+    /**
+     * Get customers for a business
+     */
+    public function getCustomersForBusiness(int $businessId)
+    {
+        return Customer::where('business_id', $businessId)->get();
     }
 }

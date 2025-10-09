@@ -17,6 +17,14 @@ import map01 from "./components/map-01";
 import "./components/calendar-init.js";
 import "./components/image-resize";
 
+// ============================================
+// ADD REACT IMPORTS HERE
+// ============================================
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+import FlowBuilderDashboard from './components/FlowBuilder';
+// ============================================
+
 Alpine.plugin(persist);
 window.Alpine = Alpine;
 Alpine.start();
@@ -58,6 +66,20 @@ document.addEventListener("DOMContentLoaded", () => {
     chart03();
     userGrowthChart();
     map01();
+    
+    // ============================================
+    // ADD REACT MOUNT HERE
+    // ============================================
+    // Mount Flow Builder React Component
+    const flowBuilderRoot = document.getElementById('flow-builder-root');
+    if (flowBuilderRoot) {
+        createRoot(flowBuilderRoot).render(
+            React.createElement(FlowBuilderDashboard, { 
+                initialSteps: window.flowStepsData || [] 
+            })
+        );
+    }
+    // ============================================
 });
 
 // Get the current year
