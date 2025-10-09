@@ -45,9 +45,12 @@ class WhatsAppChatboxController extends Controller
     {
         $this->checkAuthorization(auth()->user(), ['chatbox.view']);
 
+        $business = app('current_business');
+
         $q = trim((string) $request->get('q', ''));
 
         $customers = Customer::query()
+            ->where('business_id', $business->id)
             ->addSelect([
                 'latest_message_timestamp' => WhatsAppMessage::select('timestamp')
                     ->whereColumn('phone_number', 'customers.whatsapp_number')
@@ -60,13 +63,12 @@ class WhatsAppChatboxController extends Controller
                         ->orWhere('whatsapp_number', 'like', "%{$q}%");
                 });
             })
-            ->orderByDesc('latest_message_timestamp') // 🔑 order by latest message first
+            ->orderByDesc('latest_message_timestamp')
             ->paginate(10)
             ->withQueryString();
 
         $selectedId = $request->integer('customer_id') ?: optional($customers->first())->id;
 
-        // If it's an infinite scroll request, return only the chunk
         if ($request->ajax()) {
             return view('backend.pages.chatbox._customers', [
                 'customers' => $customers,
@@ -79,14 +81,16 @@ class WhatsAppChatboxController extends Controller
 
     public function chat(Request $request, int $customerId)
     {
-        // Reuse the same data logic as CustomersController
-        $customer = Customer::with([
-            'whatsappConversation.messages' => fn($q) => $q->orderBy('timestamp', 'asc')
-        ])->findOrFail($customerId);
+        $business = app('current_business');
+
+        $customer = Customer::where('business_id', $business->id)
+            ->with([
+                'whatsappConversation.messages' => fn($q) => $q->orderBy('timestamp', 'asc')
+            ])
+            ->findOrFail($customerId);
 
         $messages = optional($customer->whatsappConversation)->messages ?? collect();
 
-        // If AJAX, return only the partial (for right pane)
         if ($request->ajax()) {
             return view('backend.pages.chatbox._chat', [
                 'customer' => $customer,
@@ -94,7 +98,6 @@ class WhatsAppChatboxController extends Controller
             ]);
         }
 
-        // Fallback: full page (same as CustomersController)
         return view('backend.pages.customers.chat', [
             'customer' => $customer,
             'messages' => $messages,

@@ -22,12 +22,40 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    protected function getCurrentBusiness()
+    {
+        if (app()->has('current_business')) {
+            return app('current_business');
+        }
+        return auth()->user()->businesses()->first();
+    }
+
+    public function index(Request $request)
     {
         $this->checkAuthorization(auth()->user(), ['orders.view']);
 
+        $business = $this->getCurrentBusiness();
+
+        if (!$business) {
+            session()->flash('error', __('Please create a business first.'));
+            return redirect()->route('admin.businesses.create');
+        }
+
+        $search = $request->input('search');
+        $perPage = config('settings.default_pagination', 10);
+
+        $orders = Order::where('business_id', $business->id)
+            ->when($search, function($query) use ($search) {
+                $query->where('id', 'like', "%{$search}%")
+                      ->orWhere('status', 'like', "%{$search}%");
+            })
+            ->with(['customer', 'items.product'])
+            ->latest('created_on')
+            ->paginate($perPage);
+
         return view('backend.pages.orders.index', [
-            'orders' => $this->orderService->getOrders()
+            'orders' => $orders,
+            'business' => $business,
         ]);
     }
 
@@ -36,32 +64,71 @@ class OrderController extends Controller
         return view('backend.pages.orders.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
+        $this->checkAuthorization(auth()->user(), ['orders.create']);
+
+        $business = $this->getCurrentBusiness();
+
+        if (!$business) {
+            return back()->with('error', __('Please create a business first.'));
+        }
+
         $request->validate([
-            'name_en' => 'required',
-            'sku' => 'required|unique:orders,sku',
-            'price' => 'required|numeric',
-            'stock' => 'required|integer',
+            'customer_id' => 'required|exists:customers,id',
+            'total' => 'required|numeric|min:0',
+            'status' => ['required', new Enum(OrderStatus::class)],
         ]);
 
-        Order::create($request->all());
+        $order = new Order();
+        $order->business_id = $business->id;
+        $order->customer_id = $request->customer_id;
+        $order->total = $request->total;
+        $order->status = $request->status;
+        $order->save();
 
-        return redirect()->route('admin.orders.index')->with('success', 'Order created successfully.');
+        $this->storeActionLog(ActionType::CREATED, ['order' => $order]);
+
+        return redirect()->route('admin.orders.index')->with('success', __('Order created successfully.'));
     }
 
     public function show($id)
     {
-        $order = Order::with(['customer', 'items.product'])->findOrFail($id);
-        return view('backend.pages.orders.show', compact('order'));
+        $this->checkAuthorization(auth()->user(), ['orders.view']);
+
+        $business = $this->getCurrentBusiness();
+
+        if (!$business) {
+            session()->flash('error', __('Please create a business first.'));
+            return redirect()->route('admin.businesses.create');
+        }
+
+        $order = Order::where('business_id', $business->id)
+            ->with(['customer', 'items.product'])
+            ->findOrFail($id);
+
+        return view('backend.pages.orders.show', [
+            'order' => $order,
+            'business' => $business,
+        ]);
     }
 
     public function edit(int $id): Renderable
     {
         $this->checkAuthorization(auth()->user(), ['orders.edit']);
-        $order = Order::findOrFail($id);
+
+        $business = $this->getCurrentBusiness();
+
+        if (!$business) {
+            session()->flash('error', __('Please create a business first.'));
+            return redirect()->route('admin.businesses.create');
+        }
+
+        $order = Order::where('business_id', $business->id)->findOrFail($id);
+
         return view('backend.pages.orders.edit', [
-            'order' => $order
+            'order' => $order,
+            'business' => $business,
         ]);
     }
 
@@ -69,22 +136,21 @@ class OrderController extends Controller
     {
         $this->checkAuthorization(auth()->user(), ['orders.edit']);
 
-        $order = Order::findOrFail($id);
+        $business = $this->getCurrentBusiness();
 
-        $order->name_en = $request->input('name_en');
-        $order->name_ar = $request->input('name_ar');
-        $order->description_en = $request->input('description_en');
-        $order->description_ar = $request->input('description_ar');
-        $order->sku = $request->input('sku');
-        $order->brand = $request->input('brand');
-        $order->price = $request->input('price');
-        $order->stock = $request->input('stock');
-        $order->status = $request->input('status');
-
-        if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('uploads/orders', 'public');
-            $order->image = $path;
+        if (!$business) {
+            return back()->with('error', __('Please create a business first.'));
         }
+
+        $order = Order::where('business_id', $business->id)->findOrFail($id);
+
+        $request->validate([
+            'total' => 'required|numeric|min:0',
+            'status' => ['required', new Enum(OrderStatus::class)],
+        ]);
+
+        $order->total = $request->input('total');
+        $order->status = $request->input('status');
 
         $order = ld_apply_filters('order_update_before_save', $order, $request);
         $order->save();
@@ -93,7 +159,7 @@ class OrderController extends Controller
 
         $this->storeActionLog(ActionType::UPDATED, ['order' => $order]);
 
-        session()->flash('success', 'Order has been updated.');
+        session()->flash('success', __('Order has been updated.'));
 
         return back();
     }
@@ -111,9 +177,26 @@ class OrderController extends Controller
     }
 
 
-    public function destroy(Order $order)
+    public function destroy(int $id): RedirectResponse
     {
+        $this->checkAuthorization(auth()->user(), ['orders.delete']);
+
+        $business = $this->getCurrentBusiness();
+
+        if (!$business) {
+            return back()->with('error', __('Please create a business first.'));
+        }
+
+        $order = Order::where('business_id', $business->id)->findOrFail($id);
+
+        $order = ld_apply_filters('order_delete_before', $order);
         $order->delete();
-        return redirect()->route('admin.orders.index')->with('success', 'Order deleted successfully.');
+        $order = ld_apply_filters('order_delete_after', $order);
+
+        $this->storeActionLog(ActionType::DELETED, ['order' => $order]);
+
+        ld_do_action('order_delete_after', $order);
+
+        return redirect()->route('admin.orders.index')->with('success', __('Order deleted successfully.'));
     }
 }

@@ -19,6 +19,7 @@ class BroadcastController extends Controller
     public function index()
     {
         $broadcasts = Broadcast::with('broadcastGroup')
+            ->where('business_id', app('current_business')->id)
             ->latest()
             ->paginate(config('settings.default_pagination', 10));
             
@@ -28,7 +29,7 @@ class BroadcastController extends Controller
     public function create()
     {
         $templates = $this->whatsAppService->getTemplates();
-        $broadcastGroups = BroadcastGroup::all();
+        $broadcastGroups = BroadcastGroup::where('business_id', app('current_business')->id)->get();
         return view('backend.pages.broadcasts.create', compact('templates', 'broadcastGroups'));
     }
 
@@ -51,6 +52,7 @@ class BroadcastController extends Controller
             : null;
 
         $broadcast = Broadcast::create([
+            'business_id' => app('current_business')->id,
             'whatsapp_template_name' => $request->whatsapp_template_name,
             'broadcast_title' => $request->broadcast_title,
             'custom_template' => $request->custom_template,
@@ -80,6 +82,7 @@ class BroadcastController extends Controller
     public function report(int $id)
     {
         $broadcast = Broadcast::with(['messages.conversation.customer', 'broadcastGroup'])
+            ->where('business_id', app('current_business')->id)
             ->findOrFail($id);
 
         $messages = $broadcast->messages()
@@ -100,7 +103,7 @@ class BroadcastController extends Controller
 
     public function destroy(int $id)
     {
-        $broadcast = Broadcast::findOrFail($id);
+        $broadcast = Broadcast::where('business_id', app('current_business')->id)->findOrFail($id);
 
         // Only allow deletion if not sent or sending
         if (in_array($broadcast->status, ['sending', 'sent'])) {

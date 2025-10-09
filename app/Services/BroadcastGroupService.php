@@ -9,12 +9,17 @@ class BroadcastGroupService
 {
     public function getGroups()
     {
-        return BroadcastGroup::with('conditions')->latest()->paginate(config('settings.default_pagination') ?? 10);
+        return BroadcastGroup::with('conditions')
+            ->where('business_id', app('current_business')->id)
+            ->latest()
+            ->paginate(config('settings.default_pagination') ?? 10);
     }
 
     public function getGroupById(int $id): BroadcastGroup
     {
-        return BroadcastGroup::with('conditions')->findOrFail($id);
+        return BroadcastGroup::with('conditions')
+            ->where('business_id', app('current_business')->id)
+            ->findOrFail($id);
     }
 
     public function createOrUpdate(array $data, ?BroadcastGroup $group = null): BroadcastGroup
@@ -22,6 +27,9 @@ class BroadcastGroupService
         $group = $group ?? new BroadcastGroup();
         $group->name = $data['name'];
         $group->description = $data['description'] ?? null;
+        if (!$group->exists) {
+            $group->business_id = app('current_business')->id;
+        }
         $group->save();
 
         // reset conditions

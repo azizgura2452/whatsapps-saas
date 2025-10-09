@@ -23,17 +23,58 @@ class DashboardController extends Controller
         private readonly LanguageService $languageService
     ) {
     }
-
+    protected function getCurrentBusiness()
+    {
+        if (app()->has('current_business')) {
+            return app('current_business');
+        }
+        return auth()->user()->businesses()->first();
+    }
     public function index()
     {
         $this->checkAuthorization(auth()->user(), ['dashboard.view']);
 
+        $business = $this->getCurrentBusiness();
+        
+        if (!$business) {
+            session()->flash('error', __('Please create a business first.'));
+            return redirect()->route('admin.businesses.create');
+        }
+
+        // Apply business scoping
+        $businessId = $business->id ?? null;
+        
+        $productQuery = Product::query();
+        $customerQuery = Customer::query();
+        $orderQuery = Order::query();
+        if ($businessId) {
+            $productQuery->where('business_id', $businessId);
+            $customerQuery->where('business_id', $businessId);
+            $orderQuery->where('business_id', $businessId);
+        } else {
+            // When no business is associated, return empty results
+            return view(
+                'backend.pages.dashboard.index',
+                [
+                    'total_products' => number_format(0),
+                    'total_customers' => number_format(0),
+                    'total_orders' => number_format(0),
+                    'languages' => [
+                        'total' => number_format(count($this->languageService->getLanguages())),
+                        'active' => number_format(count($this->languageService->getActiveLanguages())),
+                    ],
+                    'user_growth_data' => [],
+                    'user_history_data' => [],
+                ]
+            );
+        }
+
         return view(
             'backend.pages.dashboard.index',
             [
-                'total_products' => number_format(Product::count()),
-                'total_customers' => number_format(Customer::count()),
-                'total_orders' => number_format(Order::count()),
+                'total_products' => number_format($productQuery->count()),
+                'total_customers' => number_format($customerQuery->count()),
+                'total_orders' => number_format($orderQuery->count()),
                 'languages' => [
                     'total' => number_format(count($this->languageService->getLanguages())),
                     'active' => number_format(count($this->languageService->getActiveLanguages())),
@@ -50,10 +91,36 @@ class DashboardController extends Controller
     {
         $this->checkAuthorization(auth()->user(), ['dashboard.view']);
 
+        // Apply business scoping
+        $businessId = $business->id ?? null;
+
+        $productQuery = Product::query();
+        $customerQuery = Customer::query();
+        $orderQuery = Order::query();
+
+        if ($businessId) {
+            $productQuery->where('business_id', $businessId);
+            $customerQuery->where('business_id', $businessId);
+            $orderQuery->where('business_id', $businessId);
+        } else {
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'products' => 0,
+                    'customers' => 0,
+                    'orders' => 0,
+                    'languages' => [
+                        'total' => count($this->languageService->getLanguages()),
+                        'active' => count($this->languageService->getActiveLanguages()),
+                    ],
+                ],
+            ]);
+        }
+
         $stats = [
-            'products' => Product::count(),
-            'customers' => Customer::count(),
-            'orders' => Order::count(),
+            'products' => $productQuery->count(),
+            'customers' => $customerQuery->count(),
+            'orders' => $orderQuery->count(),
             'languages' => [
                 'total' => count($this->languageService->getLanguages()),
                 'active' => count($this->languageService->getActiveLanguages()),
@@ -75,8 +142,8 @@ class DashboardController extends Controller
 
         Mail::raw('Hello, this is a test email sent from the DashboardController!', function ($message) {
             $message->to('difora5626@fenexy.com')
-                    ->subject('New order received')
-                    ->from(config('mail.from.address'), config('mail.from.name'));
+                ->subject('New order received')
+                ->from(config('mail.from.address'), config('mail.from.name'));
         });
 
         return response()->json([

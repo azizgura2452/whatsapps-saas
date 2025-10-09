@@ -9,13 +9,22 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class OrderService
 {
+    protected function getCurrentBusinessId(): ?int
+    {
+        if (app()->has('current_business')) {
+            return app('current_business')->id;
+        }
+        return auth()->user()?->businesses()?->first()?->id;
+    }
+
     public function createOrderWithItems(array $data): Order
     {
         $total = 0;
         $orderItems = [];
+        $businessId = $data['business_id'] ?? $this->getCurrentBusinessId();
 
         foreach ($data['items'] as $item) {
-            $product = Product::findOrFail($item['product_id']);
+            $product = Product::where('business_id', $businessId)->findOrFail($item['product_id']);
             $lineTotal = $product->price * $item['quantity'];
             $total += $lineTotal;
 
@@ -28,11 +37,12 @@ class OrderService
         }
 
         $order = Order::create([
+            'business_id' => $businessId,
             'customer_id' => $data['customer_id'],
             'total' => $total,
-            'delivery_charge' => $data['delivery_charge'],
-            'currency' => $data['currency'],
-            'status' => $data['status'],
+            'delivery_charge' => $data['delivery_charge'] ?? 0,
+            'currency' => $data['currency'] ?? 'KWD',
+            'status' => $data['status'] ?? 'Pending',
             'source' => $data['source'] ?? null,
             'notes' => $data['notes'] ?? null,
         ]);
@@ -47,25 +57,32 @@ class OrderService
 
     public function getOrderById(int $orderId): ?Order
     {
-        return Order::with('items')->find($orderId);
+        $businessId = $this->getCurrentBusinessId();
+        return Order::where('business_id', $businessId)
+            ->with('items')
+            ->find($orderId);
     }
 
     public function updateOrderStatus(int $orderId, string $status): bool
     {
-        $order = Order::find($orderId);
-        if (!$order)
+        $businessId = $this->getCurrentBusinessId();
+        $order = Order::where('business_id', $businessId)->find($orderId);
+        if (!$order) {
             return false;
+        }
         $order->status = $status;
         return $order->save();
     }
 
     public function cancelOrder(int $orderId): bool
     {
-        $order = Order::with('items')->find($orderId);
-        if (!$order)
+        $businessId = $this->getCurrentBusinessId();
+        $order = Order::where('business_id', $businessId)->with('items')->find($orderId);
+        if (!$order) {
             return false;
+        }
         foreach ($order->items as $item) {
-            $product = Product::find($item->product_id);
+            $product = Product::where('business_id', $businessId)->find($item->product_id);
             if ($product) {
                 $product->stock += $item->quantity;
                 $product->save();
@@ -77,7 +94,9 @@ class OrderService
 
     public function getOrdersByCustomer(int $customerId, int $perPage = 10)
     {
-        return Order::where('customer_id', $customerId)
+        $businessId = $this->getCurrentBusinessId();
+        return Order::where('business_id', $businessId)
+            ->where('customer_id', $customerId)
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
     }
@@ -95,11 +114,13 @@ class OrderService
 
     public function getOrders(): LengthAwarePaginator
     {
-        $query = Order::query();
+        $businessId = $this->getCurrentBusinessId();
+        $query = Order::where('business_id', $businessId);
         $search = request()->input('search');
 
         if ($search) {
-            $query->where('id', $search);
+            $query->where('id', 'like', "%{$search}%")
+                  ->orWhere('status', 'like', "%{$search}%");
         }
 
         return $query->latest()->paginate(config('settings.default_pagination') ?? 10);
