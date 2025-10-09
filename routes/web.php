@@ -90,11 +90,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     Route::get('customers/{customerId}/chat', [CustomersController::class, 'chat'])->name('customers.chat');
     Route::get('customers/{customer}/messages', [CustomersController::class, 'fetchMessages'])->name('customers.messages');
     Route::get('customers/attribute-values/{key}', [CustomersController::class, 'getAttributeValues'])
-    ->name('customers.attribute-values');
+        ->name('customers.attribute-values');
     Route::post('customers/{customer}/send-message', [CustomersController::class, 'sendMessage'])
-    ->name('customers.sendMessage');
-
+        ->name('customers.sendMessage');
+    Route::post('customers/import', [CustomersController::class, 'importCustomers'])
+        ->name('customers.import');
+    Route::get('customers/download-template', [CustomersController::class, 'downloadTemplate'])
+        ->name('customers.download-template');
     Route::resource('customers', CustomersController::class);
+
+    
     Route::resource('whatsapp-templates', WhatsAppTemplatesController::class);
     // Broadcasts
     Route::resource('broadcasts', BroadcastController::class);
@@ -121,7 +126,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => ['auth']], 
     // Note: polling will reuse existing route('admin.customers.messages', $customer)
 
     Route::get('whatsapp-chatbox/media/{mediaId}', [WhatsAppChatboxController::class, 'downloadMedia'])
-    ->name('whatsapp.chatbox.media');
+        ->name('whatsapp.chatbox.media');
 });
 
 // Profile

@@ -13,6 +13,7 @@ use App\Models\WhatsAppConversation;
 use App\Models\WhatsAppMessage;
 use App\Services\CustomerService;
 use App\Services\RolesService;
+use App\Services\CustomerImportService;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Hash;
@@ -24,7 +25,8 @@ class CustomersController extends Controller
     public function __construct(
         private readonly CustomerService $customerService,
         private readonly RolesService $rolesService,
-        private readonly WhatsAppService $whatsAppService
+        private readonly WhatsAppService $whatsAppService,
+        private readonly CustomerImportService $importService
     ) {
     }
 
@@ -91,6 +93,7 @@ class CustomersController extends Controller
         $user->name = $request->name;
         $user->whatsapp_number = $request->whatsapp_number;
         $user->address = $request->address;
+        $user->email = $request->email;
         $user->birthday = $request->birthday;
         $user->gender = $request->gender;
         $user->save();
@@ -113,7 +116,6 @@ class CustomersController extends Controller
         return redirect()->route('admin.customers.index');
     }
 
-
     public function update(Request $request, int $id): RedirectResponse
     {
         $this->checkAuthorization(auth()->user(), ['customers.edit']);
@@ -122,6 +124,7 @@ class CustomersController extends Controller
         $user->name = $request->name;
         $user->whatsapp_number = $request->whatsapp_number;
         $user->address = $request->address;
+        $user->email = $request->email;
         $user->birthday = $request->birthday;
         $user->gender = $request->gender;
         $user->save();
@@ -145,8 +148,6 @@ class CustomersController extends Controller
         session()->flash('success', 'Customer has been updated.');
         return back();
     }
-
-
 
     public function edit(int $id): Renderable
     {
@@ -195,7 +196,7 @@ class CustomersController extends Controller
 
     public function chat(int $customerId): Renderable
     {
-        $this->checkAuthorization(auth()->user(), ['customers.view']); // Adjust permission if needed
+        $this->checkAuthorization(auth()->user(), ['customers.view']);
 
         $customer = Customer::with([
             'whatsappConversation.messages' => function ($query) {
@@ -211,12 +212,10 @@ class CustomersController extends Controller
 
         \Log::info('Customer WhatsApp Conversation:', ['conversation' => $customer->whatsappConversation]);
 
-
         $messages = $customer->whatsappConversation->messages ?? collect();
 
         \Log::info("Loaded messages count", ['count' => $messages->count()]);
 
-        // Optional: log first message to check data format
         if ($messages->isNotEmpty()) {
             \Log::debug("First message", ['message' => $messages->first()->toArray()]);
         } else {
@@ -228,8 +227,6 @@ class CustomersController extends Controller
             'messages' => $messages,
         ]);
     }
-
-    // In CustomerController or a new ChatController
 
     public function fetchMessages(Request $request, int $customerId)
     {
@@ -254,4 +251,49 @@ class CustomersController extends Controller
         ]);
     }
 
+    /**
+     * Import customers from CSV file
+     */
+    public function importCustomers(Request $request): RedirectResponse
+    {
+        $this->checkAuthorization(auth()->user(), ['customers.create']);
+
+        $request->validate([
+            'customer_csv' => 'required|file|mimes:csv,txt|max:10240',
+        ]);
+
+        $result = $this->importService->importFromCsv(
+            $request->file('customer_csv')
+        );
+
+        if ($result['success']) {
+            session()->flash('success', __(':count customers imported successfully. Failed: :failed', [
+                'count' => $result['imported'],
+                'failed' => $result['failed']
+            ]));
+        } else {
+            session()->flash('error', __('Import failed: :error', [
+                'error' => implode(', ', $result['errors'])
+            ]));
+        }
+
+        return back();
+    }
+
+    /**
+     * Download CSV template for customer import
+     */
+    public function downloadTemplate()
+    {
+        $csvContent = "phone,name,email,city,age,gender,purchase_history\n";
+        $csvContent .= "96597021234,John Doe,john@example.com,Kuwait,30,Male,Premium\n";
+        $csvContent .= "96597021235,Jane Smith,jane@example.com,Kuwait,25,Female,Regular\n";
+        $csvContent .= "96597021236,Bob Johnson,bob@example.com,Kuwait,35,Male,VIP\n";
+
+        $fileName = 'customer_import_template_' . date('Y-m-d') . '.csv';
+
+        return response($csvContent)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"");
+    }
 }

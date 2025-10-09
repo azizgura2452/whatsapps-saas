@@ -49,34 +49,37 @@
 
                     
                     <form method="GET" action="<?php echo e(route('admin.customers.index')); ?>" class="flex items-center gap-2" id="filter-form">
-    <select name="attribute" id="attribute"
-        class="rounded-lg border-gray-300 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-        <option value=""><?php echo e(__('Select Attribute')); ?></option>
-        <?php $__currentLoopData = $attributes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option value="<?php echo e($attr); ?>" <?php echo e(request('attribute') == $attr ? 'selected' : ''); ?>>
-                <?php echo e(ucfirst($attr)); ?>
+                        <select name="attribute" id="attribute"
+                            class="rounded-lg border-gray-300 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value=""><?php echo e(__('Select Attribute')); ?></option>
+                            <?php $__currentLoopData = $attributes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($attr); ?>" <?php echo e(request('attribute') == $attr ? 'selected' : ''); ?>>
+                                    <?php echo e(ucfirst($attr)); ?>
 
-            </option>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    </select>
+                                </option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </select>
 
-    <select name="value" id="value"
-        class="rounded-lg border-gray-300 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-        <option value=""><?php echo e(__('Select Value')); ?></option>
-        
-    </select>
+                        <select name="value" id="value"
+                            class="rounded-lg border-gray-300 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                            <option value=""><?php echo e(__('Select Value')); ?></option>
+                            
+                        </select>
 
-    <button type="submit" class="btn-primary">
-        <i class="bi bi-search"></i> <?php echo e(__('Search')); ?>
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-search"></i> <?php echo e(__('Search')); ?>
 
-    </button>
-</form>
-
+                        </button>
+                    </form>
                 </div>
 
-
                 <div class="flex items-center gap-2">
-                    <?php if(auth()->user()->can('customers.edit')): ?>
+                    <?php if(auth()->user()->can('customers.create')): ?>
+                        <button type="button" onclick="toggleImportModal()" class="btn-default">
+                            <i class="bi bi-file-earmark-arrow-up mr-2"></i>
+                            <?php echo e(__('Import CSV')); ?>
+
+                        </button>
                         <a href="<?php echo e(route('admin.customers.create')); ?>" class="btn-primary">
                             <i class="bi bi-plus-circle mr-2"></i>
                             <?php echo e(__('New Customer')); ?>
@@ -94,10 +97,9 @@
                             <th width="15%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5"><?php echo e(__('Name')); ?></th>
                             <th width="10%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5"><?php echo e(__('WhatsApp Number')); ?></th>
                             <th width="20%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">
-    <?php echo e(__('Attributes')); ?>
+                                <?php echo e(__('Attributes')); ?>
 
-</th>
-
+                            </th>
                             <?php ld_apply_filters('user_list_page_table_header_before_action', '') ?>
                             <th width="15%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5"><?php echo e(__('Action')); ?></th>
                             <?php ld_apply_filters('user_list_page_table_header_after_action', '') ?>
@@ -110,17 +112,16 @@
                                 <td class="px-5 py-4 sm:px-6"><?php echo e(ucwords($customer->name)); ?></td>
                                 <td class="px-5 py-4 sm:px-6"><?php echo e($customer->whatsapp_number); ?></td>
                                 <td class="px-5 py-4 sm:px-6">
-    <?php $__currentLoopData = $customer->attributes->take(2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-        <span class="inline-block text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 mr-1">
-            <?php echo e($attr->key); ?>: <?php echo e($attr->value); ?>
+                                    <?php $__currentLoopData = $customer->attributes->take(2); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $attr): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <span class="inline-block text-xs bg-gray-100 dark:bg-gray-700 rounded px-2 py-1 mr-1">
+                                            <?php echo e($attr->key); ?>: <?php echo e($attr->value); ?>
 
-        </span>
-    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <?php if($customer->attributes->count() > 2): ?>
-        <span class="text-xs text-gray-500">+<?php echo e($customer->attributes->count() - 2); ?> more</span>
-    <?php endif; ?>
-</td>
-
+                                        </span>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($customer->attributes->count() > 2): ?>
+                                        <span class="text-xs text-gray-500">+<?php echo e($customer->attributes->count() - 2); ?> more</span>
+                                    <?php endif; ?>
+                                </td>
                                 <?php ld_apply_filters('customer_list_page_table_row_before_action', '', $customer) ?>
                                 <td class="flex px-5 py-4 sm:px-6 text-center gap-1">
                                     <?php if(auth()->user()->can('customers.view')): ?>
@@ -137,7 +138,7 @@
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if(auth()->user()->can('customers.view')): ?> 
+                                    <?php if(auth()->user()->can('customers.view')): ?>
                                         <a data-tooltip-target="tooltip-orders-user-<?php echo e($customer->id); ?>" 
                                         class="btn-default !p-3" 
                                         href="<?php echo e(route('admin.customers.orders', $customer->id)); ?>">
@@ -172,7 +173,6 @@
                                         </div>
 
                                         <div id="delete-modal-<?php echo e($customer->id); ?>" tabindex="-1" class="hidden fixed inset-0 z-50 flex items-center justify-center">
-                                            <!-- Modal Content -->
                                             <div class="relative p-4 w-full max-w-md bg-white rounded-lg shadow-lg dark:bg-gray-700 z-60">
                                                 <button type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="delete-modal-<?php echo e($customer->id); ?>">
                                                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -220,15 +220,73 @@
         </div>
     </div>
 </div>
+
+
+<div id="importModal" class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 w-[95%] max-w-2xl rounded-xl shadow-xl p-6 relative">
+        <button onclick="toggleImportModal()"
+            class="absolute top-2 right-3 text-gray-500 hover:text-red-600 text-2xl">&times;</button>
+
+        <h2 class="text-lg font-semibold mb-4"><?php echo e(__('Import Customers from CSV')); ?></h2>
+
+        <form action="<?php echo e(route('admin.customers.import')); ?>" method="POST" enctype="multipart/form-data">
+            <?php echo csrf_field(); ?>
+
+            <div class="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    <?php echo e(__('Upload a CSV file with customer data. Required column: phone, phone_number, or whatsapp_number. Optional: name, email, and any custom attributes.')); ?>
+
+                </p>
+                
+                <div class="mb-3">
+                    <label class="block text-sm font-medium mb-2"><?php echo e(__('CSV File')); ?></label>
+                    <input type="file" name="customer_csv" accept=".csv,.txt" required
+                           class="w-full border rounded px-3 py-2 bg-white dark:bg-gray-800">
+                    <small class="text-gray-500 dark:text-gray-400">
+                        <?php echo e(__('Max file size: 10MB')); ?>
+
+                    </small>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-3 rounded border">
+                    <p class="text-xs font-semibold mb-2"><?php echo e(__('CSV Format Example:')); ?></p>
+                    <pre class="text-xs bg-gray-100 dark:bg-gray-900 p-2 rounded overflow-x-auto">phone,name,email,city,age
++1234567890,John Doe,john@example.com,New York,30
++0987654321,Jane Smith,jane@example.com,Los Angeles,25</pre>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <a href="<?php echo e(route('admin.customers.download-template')); ?>" class="btn-default">
+                    <i class="bi bi-download mr-2"></i>
+                    <?php echo e(__('Download Template')); ?>
+
+                </a>
+                <div class="flex gap-2">
+                    <button type="button" onclick="toggleImportModal()" class="btn-default"><?php echo e(__('Cancel')); ?></button>
+                    <button type="submit" class="btn-primary">
+                        <i class="bi bi-upload mr-2"></i>
+                        <?php echo e(__('Import Customers')); ?>
+
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startPush('scripts'); ?>
 <script>
+function toggleImportModal() {
+    const modal = document.getElementById('importModal');
+    modal.classList.toggle('hidden');
+}
+
 document.getElementById('attribute').addEventListener('change', function() {
     let attribute = this.value;
     let valueDropdown = document.getElementById('value');
 
-    // Clear old options
     valueDropdown.innerHTML = '<option value=""><?php echo e(__('Select Value')); ?></option>';
 
     if (attribute) {
@@ -239,7 +297,6 @@ document.getElementById('attribute').addEventListener('change', function() {
                     let option = document.createElement('option');
                     option.value = val;
                     option.textContent = val;
-                    // Preserve selected value if coming back from search
                     if ("<?php echo e(request('value')); ?>" === val) {
                         option.selected = true;
                     }
@@ -250,7 +307,6 @@ document.getElementById('attribute').addEventListener('change', function() {
     }
 });
 
-// Auto-load values if page has attribute pre-selected
 window.addEventListener('DOMContentLoaded', function() {
     let selectedAttr = document.getElementById('attribute').value;
     if (selectedAttr) {
@@ -259,5 +315,4 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 <?php $__env->stopPush(); ?>
-
 <?php echo $__env->make('backend.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\varsity\resources\views/backend/pages/customers/index.blade.php ENDPATH**/ ?>

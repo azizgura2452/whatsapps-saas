@@ -40,7 +40,7 @@
 
                     <form action="{{ route('admin.broadcasts.store') }}" method="POST">
                         @csrf
-                        <div class="space-y-6">
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <label for="broadcast_title" class="block text-sm font-medium text-gray-700 dark:text-gray-400">
                                     {{ __('Title') }}
@@ -66,7 +66,7 @@
                             </div>
 
                             <div id="dynamicInputsContainer" class="space-y-4"></div>
-                            <input type="text" name="custom_template" id="resolved_template_values">
+                            <input type="hidden" name="custom_template" id="resolved_template_values">
 
                             <div>
                                 <label class="block text-sm font-medium">{{ __('Preview') }}</label>
@@ -124,41 +124,41 @@
                             </div>
 
                             {{-- Send Type Selection --}}
-<div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
-    <h3 class="font-medium mb-3">{{ __('Send Options') }}</h3>
-    
-    <div class="space-y-3">
-        <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="send_type" value="immediate" 
-                   class="form-radio" checked onchange="toggleScheduleInput()">
-            <span>{{ __('Send Immediately') }}</span>
-        </label>
+                            <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-800">
+                                <h3 class="font-medium mb-3">{{ __('Send Options') }}</h3>
+                                
+                                <div class="space-y-3">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="send_type" value="immediate" 
+                                            class="form-radio" checked onchange="toggleScheduleInput()">
+                                        <span>{{ __('Send Immediately') }}</span>
+                                    </label>
 
-        <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="send_type" value="scheduled" 
-                   class="form-radio" onchange="toggleScheduleInput()">
-            <span>{{ __('Schedule for Later') }}</span>
-        </label>
-    </div>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name="send_type" value="scheduled" 
+                                            class="form-radio" onchange="toggleScheduleInput()">
+                                        <span>{{ __('Schedule for Later') }}</span>
+                                    </label>
+                                </div>
 
-    {{-- Schedule DateTime Input --}}
-    <div id="schedule_input" class="mt-4 hidden">
-        <label class="block text-sm font-medium mb-2">
-            {{ __('Schedule Date & Time') }}
-        </label>
-        <input type="datetime-local" name="scheduled_at" class="form-control"
-               min="{{ now()->format('Y-m-d\TH:i') }}">
-        <small class="text-gray-500 dark:text-gray-400">
-            {{ __('Select when this broadcast should be sent') }}
-        </small>
-    </div>
-</div>
-
-                            <div class="flex gap-4">
+                                {{-- Schedule DateTime Input --}}
+                                <div id="schedule_input" class="mt-4 hidden">
+                                    <label class="block text-sm font-medium mb-2">
+                                        {{ __('Schedule Date & Time') }}
+                                    </label>
+                                    <input type="datetime-local" name="scheduled_at" class="form-control"
+                                        min="{{ now()->format('Y-m-d\TH:i') }}">
+                                    <small class="text-gray-500 dark:text-gray-400">
+                                        {{ __('Select when this broadcast should be sent') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                            <div class="flex gap-4" style="margin-top: 12px">
                                 <button type="submit" class="btn-primary">{{ __('Send Broadcast') }}</button>
                                 <a href="{{ route('admin.broadcasts.index') }}" class="btn-default">{{ __('Cancel') }}</a>
                             </div>
-                        </div>
                     </form>
                 </div>
             </div>

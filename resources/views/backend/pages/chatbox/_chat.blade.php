@@ -20,6 +20,7 @@
 @php
   $lastMessageDate = null;
   $lastTs = (int) ($messages->last()->timestamp ?? 0);
+  $appTimezone = config('app.timezone');
 @endphp
 
 {{-- FIXED HEIGHT + SCROLL (no Tailwind height): the wrapper is 90vh --}}
@@ -55,7 +56,9 @@
     ">
     @forelse($messages as $message)
       @php
-        $messageDate = \Carbon\Carbon::createFromTimestamp($message->timestamp)->toDateString();
+        $messageDate = \Carbon\Carbon::createFromTimestamp($message->timestamp)
+            ->timezone($appTimezone)
+            ->toDateString();
       @endphp
 
       {{-- Date chip --}}
@@ -63,7 +66,7 @@
         <div class="text-center my-4">
           <span
             class="inline-block bg-gray-200/80 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs px-3 py-1 rounded-full">
-            {{ \Carbon\Carbon::parse($messageDate)->format('F j, Y') }}
+            {{ \Carbon\Carbon::parse($messageDate)->timezone($appTimezone)->format('F j, Y') }}
           </span>
         </div>
         @php $lastMessageDate = $messageDate; @endphp
@@ -134,7 +137,7 @@
 
           {{-- Time --}}
           <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-300 text-right">
-            {{ \Carbon\Carbon::createFromTimestamp($message->timestamp)->format('h:i A') }}
+            {{ \Carbon\Carbon::createFromTimestamp($message->timestamp)->timezone($appTimezone)->format('h:i A') }}
           </div>
         </div>
       </div>
@@ -151,8 +154,6 @@
           class="flex-1 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white px-4 py-2 text-sm"
           onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMessage({{ $customer->id }});}">
         <button type="button" id="sendBtn" class="btn-primary" onclick="sendMessage({{ $customer->id }})">
-          {{-- <i class="fa fa-paper-plane"></i> --}}
-          {{-- Using Bootstrap Icons to match rest of the admin --}}
           <i class="bi bi-send"></i>
         </button>
       </form>

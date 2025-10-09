@@ -123,3 +123,52 @@ if (!function_exists('get_languages')) {
         return app(LanguageService::class)->getActiveLanguages();
     }
 }
+
+// For better timezone handling, create a helper function in app/helpers.php or a Helper class
+
+if (!function_exists('format_message_time')) {
+    /**
+     * Format message timestamp with system timezone
+     * 
+     * @param int $timestamp Unix timestamp
+     * @param string $format Time format
+     * @return string
+     */
+    function format_message_time($timestamp, $format = 'h:i A')
+    {
+        return \Carbon\Carbon::createFromTimestamp($timestamp)
+            ->timezone(config('app.timezone'))
+            ->format($format);
+    }
+}
+
+if (!function_exists('format_message_date')) {
+    /**
+     * Format message date with system timezone
+     * 
+     * @param int $timestamp Unix timestamp
+     * @param string $format Date format
+     * @return string
+     */
+    function format_message_date($timestamp, $format = 'F j, Y')
+    {
+        return \Carbon\Carbon::createFromTimestamp($timestamp)
+            ->timezone(config('app.timezone'))
+            ->format($format);
+    }
+}
+
+if (!function_exists('get_message_date_string')) {
+    /**
+     * Get date string from timestamp for grouping messages
+     * 
+     * @param int $timestamp Unix timestamp
+     * @return string
+     */
+    function get_message_date_string($timestamp)
+    {
+        return \Carbon\Carbon::createFromTimestamp($timestamp)
+            ->timezone(config('app.timezone'))
+            ->toDateString();
+    }
+}

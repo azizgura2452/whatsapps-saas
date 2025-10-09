@@ -20,6 +20,7 @@
 <?php
   $lastMessageDate = null;
   $lastTs = (int) ($messages->last()->timestamp ?? 0);
+  $appTimezone = config('app.timezone');
 ?>
 
 
@@ -56,7 +57,9 @@
     ">
     <?php $__empty_1 = true; $__currentLoopData = $messages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $message): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
       <?php
-        $messageDate = \Carbon\Carbon::createFromTimestamp($message->timestamp)->toDateString();
+        $messageDate = \Carbon\Carbon::createFromTimestamp($message->timestamp)
+            ->timezone($appTimezone)
+            ->toDateString();
       ?>
 
       
@@ -64,7 +67,7 @@
         <div class="text-center my-4">
           <span
             class="inline-block bg-gray-200/80 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs px-3 py-1 rounded-full">
-            <?php echo e(\Carbon\Carbon::parse($messageDate)->format('F j, Y')); ?>
+            <?php echo e(\Carbon\Carbon::parse($messageDate)->timezone($appTimezone)->format('F j, Y')); ?>
 
           </span>
         </div>
@@ -139,7 +142,7 @@
 
           
           <div class="mt-1 text-[10px] text-gray-500 dark:text-gray-300 text-right">
-            <?php echo e(\Carbon\Carbon::createFromTimestamp($message->timestamp)->format('h:i A')); ?>
+            <?php echo e(\Carbon\Carbon::createFromTimestamp($message->timestamp)->timezone($appTimezone)->format('h:i A')); ?>
 
           </div>
         </div>
@@ -157,8 +160,6 @@
           class="flex-1 rounded-lg border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-white px-4 py-2 text-sm"
           onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMessage(<?php echo e($customer->id); ?>);}">
         <button type="button" id="sendBtn" class="btn-primary" onclick="sendMessage(<?php echo e($customer->id); ?>)">
-          
-          
           <i class="bi bi-send"></i>
         </button>
       </form>

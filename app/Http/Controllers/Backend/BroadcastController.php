@@ -18,7 +18,10 @@ class BroadcastController extends Controller
     
     public function index()
     {
-        $broadcasts = Broadcast::with('broadcastGroup')->latest()->paginate(20);
+        $broadcasts = Broadcast::with('broadcastGroup')
+            ->latest()
+            ->paginate(config('settings.default_pagination', 10));
+            
         return view('backend.pages.broadcasts.index', compact('broadcasts'));
     }
 
@@ -44,8 +47,8 @@ class BroadcastController extends Controller
         // Determine status
         $status = $request->send_type === 'scheduled' ? 'scheduled' : 'draft';
         $scheduledAt = $request->send_type === 'scheduled' 
-        ? \Carbon\Carbon::parse($request->scheduled_at, 'Asia/Kolkata')->setTimezone('UTC')
-        : null;
+            ? \Carbon\Carbon::parse($request->scheduled_at, config('app.timezone'))->setTimezone('UTC')
+            : null;
 
         $broadcast = Broadcast::create([
             'whatsapp_template_name' => $request->whatsapp_template_name,
@@ -62,12 +65,16 @@ class BroadcastController extends Controller
             SendScheduledBroadcastJob::dispatch($broadcast);
             
             return redirect()->route('admin.broadcasts.index')
-                ->with('success', 'Broadcast is being sent to recipients.');
+                ->with('success', __('Broadcast is being sent to recipients.'));
         }
 
         // If scheduled
+        $scheduledTime = \Carbon\Carbon::parse($scheduledAt, 'UTC')
+            ->setTimezone(config('app.timezone'))
+            ->format('M d, Y h:i A');
+            
         return redirect()->route('admin.broadcasts.index')
-            ->with('success', 'Broadcast scheduled for ' . \Carbon\Carbon::parse($scheduledAt, 'UTC')->setTimezone('Asia/Kolkata'));
+            ->with('success', __('Broadcast scheduled for :time', ['time' => $scheduledTime]));
     }
 
     public function report(int $id)
@@ -97,11 +104,11 @@ class BroadcastController extends Controller
 
         // Only allow deletion if not sent or sending
         if (in_array($broadcast->status, ['sending', 'sent'])) {
-            return back()->with('error', 'Cannot delete a broadcast that has been sent or is currently sending.');
+            return back()->with('error', __('Cannot delete a broadcast that has been sent or is currently sending.'));
         }
 
         $broadcast->delete();
 
-        return back()->with('success', 'Broadcast deleted successfully.');
+        return back()->with('success', __('Broadcast deleted successfully.'));
     }
 }
