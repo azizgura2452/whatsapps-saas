@@ -5,6 +5,12 @@
 @endsection
 
 @section('admin-content')
+@php
+    $currentBusiness = app()->has('current_business')
+        ? app('current_business')
+        : (auth()->user()?->businesses()->first());
+@endphp
+
     <div class="p-4 mx-auto max-w-7xl md:p-6">
         <div x-data="{ pageName: '{{ __('Edit User') }}' }">
             <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -43,6 +49,24 @@
                         enctype="multipart/form-data">
                         @method('PUT')
                         @csrf
+
+                        {{-- Keep user tied to their business --}}
+                        <input type="hidden" name="business_id" value="{{ $user->business_id ?? ($currentBusiness->id ?? null) }}">
+                        @if ($user->business_id || $currentBusiness)
+                            <div>
+                                <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white">
+                                    {{ __('Business') }}:
+                                    @if(method_exists($user, 'business') && $user->business)
+                                        {{ $user->business->name ?? ('#'.$user->business->id) }}
+                                    @elseif($currentBusiness)
+                                        {{ $currentBusiness->name ?? ('#'.$currentBusiness->id) }}
+                                    @else
+                                        {{ __('—') }}
+                                    @endif
+                                </span>
+                            </div>
+                        @endif
+
                         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                             <div>
                                 <label for="name"

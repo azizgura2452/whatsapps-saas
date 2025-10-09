@@ -27,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'username',
+        'business_id',
     ];
 
     /**
@@ -65,11 +66,11 @@ class User extends Authenticatable
     public function getCurrentBusiness()
     {
         $businessId = session('current_business_id');
-        
+
         if ($businessId) {
             return $this->businesses()->find($businessId);
         }
-        
+
         return $this->businesses()->first();
     }
 
@@ -87,5 +88,10 @@ class User extends Authenticatable
         } else {
             $this->notify(new DefaultResetPassword($token));
         }
+    }
+
+    public function business()
+    {
+        return $this->belongsTo(\App\Models\Business::class);
     }
 }

@@ -7,7 +7,7 @@
 @section('admin-content')
 
 <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-    <div x-data="{ pageName: {{ __('Users') }} }">
+    <div x-data="{ pageName: '{{ __('Users') }}' }">
         <div class="mb-6 flex flex-wrap items-center justify-between gap-3">
             <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">
                 {{ __('Users') }}
@@ -79,9 +79,13 @@
                 <table id="dataTable" class="w-full dark:text-gray-400">
                     <thead class="bg-light text-capitalize">
                         <tr class="border-b border-gray-100 dark:border-gray-800">
-                            <th width="5%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Sl') }}</th>
+                            <th width="5%"  class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Sl') }}</th>
                             <th width="15%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Name') }}</th>
-                            <th width="10%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Email') }}</th>
+                            <th width="12%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Email') }}</th>
+
+                            {{-- New Business column --}}
+                            <th width="18%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Business') }}</th>
+
                             <th width="30%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Roles') }}</th>
                             @php ld_apply_filters('user_list_page_table_header_before_action', '') @endphp
                             <th width="15%" class="p-2 bg-gray-50 dark:bg-gray-800 dark:text-white text-left px-5">{{ __('Action') }}</th>
@@ -105,6 +109,21 @@
                                     @endif
                                 </td>
                                 <td class="px-5 py-4 sm:px-6">{{ $user->email }}</td>
+
+                                {{-- Business cell --}}
+                                <td class="px-5 py-4 sm:px-6 md:min-w-[180px]">
+                                    @if(method_exists($user, 'business') && $user->relationLoaded('business') ? $user->business : $user->business ?? false)
+                                        <span class="inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white">
+                                            {{ optional($user->business)->name ?? ('#'.$user->business_id) }}
+                                        </span>
+                                    @else
+                                        {{-- Fallback to ID if relation is not defined --}}
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">
+                                            {{ $user->business_id ? ('#'.$user->business_id) : '—' }}
+                                        </span>
+                                    @endif
+                                </td>
+
                                 <td class="px-5 py-4 sm:px-6">
                                     @foreach ($user->roles as $role)
                                         <span class="capitalize inline-flex items-center justify-center px-2 py-1 text-xs font-medium text-gray-800 bg-gray-100 rounded-full dark:bg-gray-800 dark:text-white">
@@ -183,7 +202,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-4">
+                                <td colspan="6" class="text-center py-4">
                                     <p class="text-gray-500 dark:text-gray-400">{{ __('No users found') }}</p>
                                 </td>
                             </tr>
@@ -203,7 +222,11 @@
     <script>
         function handleRoleFilter(value) {
             let currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('role', value);
+            if (!value) {
+                currentUrl.searchParams.delete('role');
+            } else {
+                currentUrl.searchParams.set('role', value);
+            }
             window.location.href = currentUrl.toString();
         }
     </script>

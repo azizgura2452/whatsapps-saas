@@ -96,7 +96,7 @@ class ProductController extends Controller
             'brand' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|string',
             'image' => 'nullable|image|max:2048',
             'link' => 'nullable|url',
         ]);
@@ -189,7 +189,7 @@ class ProductController extends Controller
             'brand' => 'nullable|string|max:255',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|string',
             'image' => 'nullable|image|max:2048',
             'link' => 'nullable|url',
         ]);

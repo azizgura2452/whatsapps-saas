@@ -10,19 +10,29 @@ use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserService
 {
-    public function getUsers(): LengthAwarePaginator
+    /**
+     * Get paginated users, optionally scoped to a business.
+     */
+    public function getUsers(?int $businessId = null): LengthAwarePaginator
     {
         $query = User::query();
-        $search = request()->input('search');
 
-        if ($search) {
-            $query->where('name', 'like', "%{$search}%")
-                ->orWhere('username', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%");
+        // Business scoping
+        if (!is_null($businessId)) {
+            $query->where('business_id', $businessId);
         }
 
-        $role = request()->input('role');
-        if ($role) {
+        // Text search
+        if ($search = request()->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Role filter
+        if ($role = request()->input('role')) {
             $query->whereHas('roles', function ($q) use ($role) {
                 $q->where('name', $role);
             });
@@ -31,12 +41,17 @@ class UserService
         return $query->latest()->paginate(config('settings.default_pagination') ?? 10);
     }
 
-    public function createUser(array $data): User
+    /**
+     * Create a user and assign business_id (if provided).
+     */
+    public function createUser(array $data, ?int $businessId = null): User
     {
         $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => Hash::make($data['password']),
+            'name'        => $data['name'],
+            'email'       => $data['email'],
+            'username'    => $data['username'] ?? null,
+            'password'    => Hash::make($data['password']),
+            'business_id' => $businessId ?? ($data['business_id'] ?? null),
         ]);
 
         if (isset($data['roles'])) {
@@ -46,8 +61,17 @@ class UserService
         return $user;
     }
 
-    public function getUserById(int $id): ?User
+    /**
+     * Get a user by ID, optionally enforcing business scope.
+     */
+    public function getUserById(int $id, ?int $businessId = null): ?User
     {
-        return User::findOrFail($id);
+        $query = User::query();
+
+        if (!is_null($businessId)) {
+            $query->where('business_id', $businessId);
+        }
+
+        return $query->findOrFail($id);
     }
 }
